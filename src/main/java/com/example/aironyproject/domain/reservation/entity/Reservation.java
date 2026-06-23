@@ -71,7 +71,8 @@ public class Reservation extends BaseTimeEntity {
             int originalPrice,
             int discountAmount
     ) {
-        validateDate(checkInDate, checkOutDate);
+        ValidCheckOutDate(checkInDate, checkOutDate);
+        ValidCheckInDate(checkInDate, checkOutDate);
 
         this.reservationNumber = reservationNumber;
         this.user = user;
@@ -99,25 +100,36 @@ public class Reservation extends BaseTimeEntity {
     // 예약상태 변경 메서드
     private void changeStatus(ReservationStatus target) {
         if (!status.canTransitTo(target)) {
-            throw new CustomException(
-                    ErrorCode.INVALID_RESERVATION_STATUS
-            );
+            throw new CustomException(ErrorCode.INVALID_RESERVATION_STATUS);
         }
 
         this.status = target;
     }
 
-    // 체크인, 체크아웃 날짜 검증
-    private void validateDate(
+    LocalDate today = LocalDate.now();
+
+
+    // 예약할 때 체크아웃 날짜가 체크인 날짜 이후인지
+    private void ValidCheckOutDate(
             LocalDate checkInDate,
             LocalDate checkOutDate
     ) {
         if (checkInDate == null ||
                 checkOutDate == null ||
                 !checkInDate.isBefore(checkOutDate)) {
-            throw new CustomException(
-                    ErrorCode.INVALID_RESERVATION_DATE
-            );
+            throw new CustomException(ErrorCode.INVALID_RESERVATION_DATE);
+        }
+    }
+
+    // 체크인 날짜가 예약 당일 날짜 이전인지 검증
+    private void ValidCheckInDate(
+            LocalDate checkInDate,
+            LocalDate today
+    ) {
+        if (checkInDate == null ||
+                today == null ||
+                checkInDate.isBefore(today)) {
+            throw new CustomException(ErrorCode.INVALID_RESERVATION_DATE);
         }
     }
 }
