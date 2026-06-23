@@ -1,5 +1,6 @@
 package com.example.aironyproject.domain.accommodations.entity;
 
+import com.example.aironyproject.common.exception.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import lombok.Getter;
