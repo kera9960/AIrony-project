@@ -42,7 +42,7 @@ public class SecurityConfig {
 
                 // 경로별 인가(Authorization) 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/accommodations/**", "/api/coupons/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
