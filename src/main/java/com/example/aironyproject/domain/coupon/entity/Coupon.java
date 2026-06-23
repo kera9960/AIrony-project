@@ -4,6 +4,7 @@ import com.example.aironyproject.common.entity.BaseTimeEntity;
 import com.example.aironyproject.common.exception.CustomException;
 import com.example.aironyproject.common.exception.ErrorCode;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "coupons")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Coupon extends BaseTimeEntity {
 
@@ -45,6 +46,11 @@ public class Coupon extends BaseTimeEntity {
     public void issue(LocalDateTime now) {
         validateIssuable(now);
         remainingQuantity--;
+
+        // 재고가 0일 시 비활성 상태
+        if(remainingQuantity == 0) {
+            status = CouponStatus.INACTIVE;
+        }
     }
 
     private void validateIssuable(LocalDateTime now) {
@@ -55,7 +61,7 @@ public class Coupon extends BaseTimeEntity {
         // 발급 가능 기간: startedAt <= now < endedAt
         if (now.isBefore(startedAt) ||
                 !now.isBefore(endedAt)) {
-            throw new CustomException(ErrorCode.COUPON_EXPIRED);
+            throw new CustomException(ErrorCode.COUPON_NOT_ISSUABLE_PERIOD);
         }
 
         if (remainingQuantity <= 0) {

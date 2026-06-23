@@ -24,6 +24,7 @@ public enum ErrorCode {
   RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION_NOT_FOUND", "예약을 찾을 수 없습니다."),
   PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAYMENT_NOT_FOUND", "결제 정보를 찾을 수 없습니다."),
   COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "COUPON_NOT_FOUND", "쿠폰을 찾을 수 없습니다."),
+  COUPON_NOT_ISSUABLE_PERIOD(HttpStatus.CONFLICT, "COUPON_NOT_ISSUABLE_PERIOD", "쿠폰 발급 가능 기간이 아닙니다."),
   USER_COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_COUPON_NOT_FOUND", "보유 쿠폰을 찾을 수 없습니다."),
   CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT_ROOM_NOT_FOUND", "문의방을 찾을 수 없습니다."),
 

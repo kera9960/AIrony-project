@@ -3,6 +3,7 @@ package com.example.aironyproject.domain.userCoupon.entity;
 import com.example.aironyproject.domain.coupon.entity.Coupon;
 import com.example.aironyproject.domain.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
                 )
             }
         )
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class UserCoupon {
 
@@ -26,7 +27,7 @@ public class UserCoupon {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "user_id")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
