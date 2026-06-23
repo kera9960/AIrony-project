@@ -13,7 +13,7 @@ public class Accommodation extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	// 숙소 ID
-	private long id;
+	private Long id;
 
 	// 숙소명
 	@Column(nullable = false, unique = true)

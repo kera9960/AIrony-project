@@ -11,8 +11,8 @@ public enum AccommodationStatus {
 
 	private final String status;
 
-	AccommodationStatus(String stauts){
-		this.status = stauts;
+	AccommodationStatus(String status){
+		this.status = status;
 	}
 
 	@JsonCreator
