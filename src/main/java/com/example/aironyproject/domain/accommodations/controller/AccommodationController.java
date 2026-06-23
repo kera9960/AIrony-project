@@ -41,8 +41,8 @@ public class AccommodationController {
 	}
 
 	@GetMapping("/accommodations/search")
-	public ResponseEntity<CheckAccommodateResponse> checkAccommodation(
-		@RequestParam(required = false) int price,
+	public ResponseEntity<List<CheckAccommodateResponse>> checkAccommodation(
+		@RequestParam(required = false) Integer price,
 		@RequestParam(required = false) String name,
 		@RequestParam(required = false)AccommodationStatus status
 	){

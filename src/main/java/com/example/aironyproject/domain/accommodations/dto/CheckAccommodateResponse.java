@@ -16,4 +16,8 @@ public record CheckAccommodateResponse (
 			accommodation.getName(),
 			accommodation.getStatus());
 	}
+
+	public CheckAccommodateResponse(int price, String name, AccommodationStatus status) {
+		this(price + " / 박", name, status);
+	}
 }

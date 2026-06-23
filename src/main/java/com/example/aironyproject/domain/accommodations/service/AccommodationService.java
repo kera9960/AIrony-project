@@ -35,7 +35,7 @@ public class AccommodationService {
 		return GetOneAccommodationResponse.from(accommodation);
 	}
 
-	public CheckAccommodateResponse checkingAccommodationWithQuery(int price, String name, AccommodationStatus status){
-		return null;
+	public List<CheckAccommodateResponse> checkingAccommodationWithQuery(Integer price, String name, AccommodationStatus status){
+		return accommodationRepository.findByOption(price, name, status);
 	}
 }
