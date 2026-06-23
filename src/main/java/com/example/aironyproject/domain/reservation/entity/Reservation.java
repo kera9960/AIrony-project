@@ -71,8 +71,8 @@ public class Reservation extends BaseTimeEntity {
             int originalPrice,
             int discountAmount
     ) {
-        ValidCheckOutDate(checkInDate, checkOutDate);
-        ValidCheckInDate(checkInDate, checkOutDate);
+        validCheckOutDate(checkInDate, checkOutDate);
+        validCheckInDate(checkInDate, checkOutDate);
 
         this.reservationNumber = reservationNumber;
         this.user = user;
@@ -110,7 +110,7 @@ public class Reservation extends BaseTimeEntity {
 
 
     // 예약할 때 체크아웃 날짜가 체크인 날짜 이후인지
-    private void ValidCheckOutDate(
+    private void validCheckOutDate(
             LocalDate checkInDate,
             LocalDate checkOutDate
     ) {
@@ -122,7 +122,7 @@ public class Reservation extends BaseTimeEntity {
     }
 
     // 체크인 날짜가 예약 당일 날짜 이전인지 검증
-    private void ValidCheckInDate(
+    private void validCheckInDate(
             LocalDate checkInDate,
             LocalDate today
     ) {
