@@ -21,10 +21,7 @@ public class AccommodationService {
 
 	public List<GetAccommodationResponse> getAccommodations(){
 		return accommodationRepository.findAll().stream()
-			.map(accommodation -> new GetAccommodationResponse(
-				accommodation.getName(),
-				accommodation.getPrice()
-			))
+			.map(GetAccommodationResponse::new)
 			.toList();
 	}
 
