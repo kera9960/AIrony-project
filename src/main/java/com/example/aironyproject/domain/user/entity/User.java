@@ -3,10 +3,9 @@ package com.example.aironyproject.domain.user.entity;
 import com.example.aironyproject.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
+
 
 
 @Entity
@@ -35,7 +34,6 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private UserRole role;
 
-    @Builder
     public User(String email, String password, String name, String phoneNumber, UserRole role) {
         this.email = email;
         this.password = password;
