@@ -28,7 +28,7 @@ public class Accommodation extends BaseTimeEntity {
 	private Long id;
 
 	// 숙소명
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false)
 	private String name;
 
 	//숙소 주소

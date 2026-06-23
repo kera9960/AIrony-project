@@ -1,4 +1,19 @@
 package com.example.aironyproject.domain.accommodations.dto;
 
-public class CheckAccommodateRequest {
+import com.example.aironyproject.domain.accommodations.entity.Accommodation;
+import com.example.aironyproject.domain.accommodations.entity.AccommodationStatus;
+
+import lombok.Getter;
+
+@Getter
+public record CheckAccommodateResponse (
+		String price,
+		String name,
+		AccommodationStatus status
+){
+	public CheckAccommodateResponse(Accommodation accommodation){
+		this(accommodation.getPrice() + " / 박",
+			accommodation.getName(),
+			accommodation.getStatus());
+	}
 }
