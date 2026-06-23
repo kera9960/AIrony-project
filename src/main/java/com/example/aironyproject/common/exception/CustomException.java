@@ -1,5 +1,14 @@
 package com.example.aironyproject.common.exception;
 
-public class CustomException {
+import lombok.Getter;
 
+@Getter
+public class CustomException extends RuntimeException {
+
+  private final ErrorCode errorCode;
+
+  public CustomException(ErrorCode errorCode) {
+    super(errorCode.getMessage());
+    this.errorCode = errorCode;
+  }
 }
