@@ -31,12 +31,13 @@ public class JwtUtil {
     }
 
     // 1. 토큰 생성 (이메일과 권한을 담음)
-    public String createToken(String email, String role) {
+    public String createToken(Long userId, String email, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessTokenExpiration);
 
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(String.valueOf(userId))
+                .claim("email", email)
                 .claim("role", role)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
@@ -54,10 +55,10 @@ public class JwtUtil {
         }
     }
 
-    // 3. 토큰에서 이메일 추출
-    public String getEmailFromToken(String token) {
-        return getClaims(token).getSubject();
-    }
+    // 3. 토큰에서 userId 추출
+    	public Long getUserId(String token) {
+    		return Long.parseLong(getClaims(token).getSubject());
+    	}
 
     // 4. 토큰에서 권한 추출
     public String getRoleFromToken(String token) {
