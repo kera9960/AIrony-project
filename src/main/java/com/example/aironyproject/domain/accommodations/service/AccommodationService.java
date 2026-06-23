@@ -36,6 +36,6 @@ public class AccommodationService {
 	}
 
 	public CheckAccommodateResponse checkingAccommodationWithQuery(int price, String name, AccommodationStatus status){
-
+		return null;
 	}
 }

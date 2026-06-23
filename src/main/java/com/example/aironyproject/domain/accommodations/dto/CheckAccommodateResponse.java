@@ -5,7 +5,7 @@ import com.example.aironyproject.domain.accommodations.entity.AccommodationStatu
 
 import lombok.Getter;
 
-@Getter
+
 public record CheckAccommodateResponse (
 		String price,
 		String name,

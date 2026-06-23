@@ -2,7 +2,7 @@ package com.example.aironyproject.domain.accommodations.dto;
 
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
 
-// ID 뜨게 하기
+
 
 public record GetAccommodationsResponse(
 		Long id,
