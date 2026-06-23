@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.aironyproject.common.exception.CustomException;
+import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.accommodations.dto.GetAccommodationResponse;
 import com.example.aironyproject.domain.accommodations.dto.GetOneAccommodationResponse;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
@@ -28,7 +30,7 @@ public class AccommodationService {
 
 	public GetOneAccommodationResponse getOneAccommodation(Long accommodationId){
 		Accommodation accommodation = accommodationRepository.findById(accommodationId).orElseThrow(
-			() -> new IllegalArgumentException("숙소를 찾을 수 없습니다.")
+			() -> new CustomException(ErrorCode.ACCOMMODATION_NOT_FOUND)
 		);
 
 		return GetOneAccommodationResponse.from(accommodation);

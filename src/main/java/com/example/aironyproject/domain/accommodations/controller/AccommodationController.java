@@ -36,4 +36,5 @@ public class AccommodationController {
 
 		return ResponseEntity.status(HttpStatus.OK).body(CommonApiResponse.success(HttpStatus.OK, "숙소 상세 조회 성공",  data));
 	}
+
 }

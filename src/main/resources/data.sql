@@ -27,24 +27,24 @@ INSERT INTO accommodations (name, address, description, price, status, created_a
 ('수원 광교 호수공원 럭셔리 호텔', '경기도 수원시 영통구 광교호수공원로 300', '광교호수공원 전망이 일품인 5성급 호텔', 250000, 'ACTIVE', NOW(), NOW()),
 ('수원 행궁동 감성 게스트하우스', '경기도 수원시 팔달구 화서문로 42', '행리단길 카페거리 중심에 위치한 아기자기한 게하', 45000, 'INACTIVE', NOW(), NOW()); -- INACTIVE 4
 
-
-INSERT INTO users (email, password, name, phone_number, role, created_at, updated_at) VALUES
--- 비밀번호 password123!
-
--- ADMIN 계정
-('admin1@admin.com', '$2a$10$7zB3wT.U/7o2x0s0Vp4v2.7/0.0/0.0.0.0.0.0.0.0.0.0.0.0', '관리자1', '010-9999-0001', 'ADMIN', NOW(), NOW()),
-('admin2@admin.com', '$2a$10$7zB3wT.U/7o2x0s0Vp4v2.7/0.0/0.0.0.0.0.0.0.0.0.0.0.0', '관리자2', '010-9999-0002', 'ADMIN', NOW(), NOW());
-
-
--- 쿠폰
-INSERT INTO coupons
-(name, discount_amount, total_quantity, remaining_quantity, started_at, ended_at, status, created_at, updated_at)
-VALUES
-('여름 휴가 지원 1만원 할인 쿠폰', 10000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
-('여름 휴가 지원 2만원 할인 쿠폰', 20000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
-('여름 휴가 지원 3만원 할인 쿠폰', 30000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
-('여름 휴가 지원 4만원 할인 쿠폰', 40000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
-('여름 휴가 지원 5만원 할인 쿠폰', 50000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW());
+--
+-- INSERT INTO users (email, password, name, phone_number, role, created_at, updated_at) VALUES
+-- -- 비밀번호 password123!
+--
+-- -- ADMIN 계정
+-- ('admin1@admin.com', '$2a$10$7zB3wT.U/7o2x0s0Vp4v2.7/0.0/0.0.0.0.0.0.0.0.0.0.0.0', '관리자1', '010-9999-0001', 'ADMIN', NOW(), NOW()),
+-- ('admin2@admin.com', '$2a$10$7zB3wT.U/7o2x0s0Vp4v2.7/0.0/0.0.0.0.0.0.0.0.0.0.0.0', '관리자2', '010-9999-0002', 'ADMIN', NOW(), NOW());
+--
+--
+-- -- 쿠폰
+-- INSERT INTO coupons
+-- (name, discount_amount, total_quantity, remaining_quantity, started_at, ended_at, status, created_at, updated_at)
+-- VALUES
+-- ('여름 휴가 지원 1만원 할인 쿠폰', 10000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
+-- ('여름 휴가 지원 2만원 할인 쿠폰', 20000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
+-- ('여름 휴가 지원 3만원 할인 쿠폰', 30000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
+-- ('여름 휴가 지원 4만원 할인 쿠폰', 40000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
+-- ('여름 휴가 지원 5만원 할인 쿠폰', 50000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW());
 
 
 

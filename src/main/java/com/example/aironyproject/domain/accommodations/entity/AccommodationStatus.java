@@ -1,5 +1,6 @@
 package com.example.aironyproject.domain.accommodations.entity;
 
+import com.example.aironyproject.common.exception.CustomException;
 import com.example.aironyproject.common.exception.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
@@ -23,7 +24,7 @@ public enum AccommodationStatus {
 				return status;
 			}
 		}
-		throw new IllegalArgumentException("일치하는 상태가 없습니다.");
+		throw new CustomException(ErrorCode.VALIDATION_FAILED);
 	}
 }
 
