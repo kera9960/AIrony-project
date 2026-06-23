@@ -11,8 +11,8 @@ public enum AccommodationStatus {
 
 	private final String status;
 
-	AccommodationStatus(String stauts){
-		this.status = stauts;
+	AccommodationStatus(String status){
+		this.status = status;
 	}
 
 	@JsonCreator
@@ -25,3 +25,4 @@ public enum AccommodationStatus {
 		throw new IllegalArgumentException("일치하는 상태가 없습니다.");
 	}
 }
+

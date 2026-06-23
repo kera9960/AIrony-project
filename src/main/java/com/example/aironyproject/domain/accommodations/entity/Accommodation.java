@@ -1,27 +1,19 @@
 package com.example.aironyproject.domain.accommodations.entity;
 
+import org.springframework.data.annotation.Id;
+
 import com.example.aironyproject.common.entity.BaseTimeEntity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@Entity
-@Getter
-@Table(name = "accommodations")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Accommodation extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	// 숙소 ID
-	private long id;
+	private Long id;
 
 	// 숙소명
 	@Column(nullable = false, unique = true)
