@@ -35,15 +35,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             // 2. 토큰이 있고 유효하다면 인증 처리
             if (token != null && jwtUtil.validateToken(token)) {
-                String email = jwtUtil.getEmailFromToken(token);
+                Long userId = jwtUtil.getUserId(token);
                 String role = jwtUtil.getRoleFromToken(token);
-
                 // 스프링 시큐리티 규격에 맞는 권한 객체 생성
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
 
                 // 인증 객체 생성
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
+                        new UsernamePasswordAuthenticationToken(userId, null, List.of(authority));
 
                 // 전역 시큐리티 컨텍스트에 인증 정보 저장
                 SecurityContextHolder.getContext().setAuthentication(authentication);
