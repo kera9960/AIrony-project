@@ -5,6 +5,8 @@ package com.example.aironyproject.domain.accommodations.entity;
 import com.example.aironyproject.common.entity.BaseTimeEntity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -43,6 +45,7 @@ public class Accommodation extends BaseTimeEntity {
 
 	// 숙소 상태
 	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
 	private AccommodationStatus status;
 
 	public Accommodation(String name, String address, String description, int price, AccommodationStatus status){
