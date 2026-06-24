@@ -2,8 +2,8 @@ package com.example.aironyproject.domain.auth.service;
 
 import com.example.aironyproject.common.exception.CustomException;
 import com.example.aironyproject.common.exception.ErrorCode;
-import com.example.aironyproject.domain.user.dto.request.SignupRequest;
-import com.example.aironyproject.domain.user.dto.response.SignupResponse;
+import com.example.aironyproject.domain.auth.dto.request.SignupRequest;
+import com.example.aironyproject.domain.auth.dto.response.SignupResponse;
 import com.example.aironyproject.domain.user.entity.User;
 import com.example.aironyproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

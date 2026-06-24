@@ -1,4 +1,4 @@
-package com.example.aironyproject.domain.user.dto.response;
+package com.example.aironyproject.domain.auth.dto.response;
 
 import com.example.aironyproject.domain.user.entity.User;
 

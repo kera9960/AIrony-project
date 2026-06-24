@@ -2,8 +2,8 @@ package com.example.aironyproject.domain.auth.controller;
 
 import com.example.aironyproject.common.response.CommonApiResponse;
 import com.example.aironyproject.domain.auth.service.AuthService;
-import com.example.aironyproject.domain.user.dto.request.SignupRequest;
-import com.example.aironyproject.domain.user.dto.response.SignupResponse;
+import com.example.aironyproject.domain.auth.dto.request.SignupRequest;
+import com.example.aironyproject.domain.auth.dto.response.SignupResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
