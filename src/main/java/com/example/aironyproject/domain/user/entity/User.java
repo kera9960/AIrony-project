@@ -1,6 +1,7 @@
 package com.example.aironyproject.domain.user.entity;
 
 import com.example.aironyproject.common.entity.BaseTimeEntity;
+import com.example.aironyproject.domain.user.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -34,7 +35,7 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private UserRole role;
 
-    public User(String email, String password, String name, String phoneNumber, UserRole role) {
+    public User(String email, String password, String name, String phoneNumber) {
         this.email = email;
         this.password = password;
         this.name = name;
