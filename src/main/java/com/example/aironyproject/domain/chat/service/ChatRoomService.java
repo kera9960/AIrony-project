@@ -5,9 +5,12 @@ import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
 import com.example.aironyproject.domain.accommodations.repository.AccommodationRepository;
 import com.example.aironyproject.domain.chat.dto.request.CreateChatRoomRequest;
-import com.example.aironyproject.domain.chat.dto.response.GetChatRoomListResponse;
 import com.example.aironyproject.domain.chat.dto.response.CreateChatRoomResponse;
+import com.example.aironyproject.domain.chat.dto.response.GetChatRoomDetailResponse;
+import com.example.aironyproject.domain.chat.dto.response.GetChatRoomListResponse;
+import com.example.aironyproject.domain.chat.entity.ChatMessage;
 import com.example.aironyproject.domain.chat.entity.ChatRoom;
+import com.example.aironyproject.domain.chat.repository.ChatMessageRepository;
 import com.example.aironyproject.domain.chat.repository.ChatRoomRepository;
 import com.example.aironyproject.domain.user.entity.User;
 import com.example.aironyproject.domain.user.repository.UserRepository;
@@ -24,6 +27,7 @@ public class ChatRoomService {
   private final ChatRoomRepository chatRoomRepository;
   private final UserRepository userRepository;
   private final AccommodationRepository accommodationRepository;
+  private final ChatMessageRepository chatMessageRepository;
 
   @Transactional
   public CreateChatRoomResponse createChatRoom(Long userId, CreateChatRoomRequest request) {
@@ -52,5 +56,25 @@ public class ChatRoomService {
         .stream()
         .map(GetChatRoomListResponse::from)
         .toList();
+  }
+
+  /**
+   * 로그인한 회원이 본인 문의방의 상세 정보와 메시지 목록을 조회
+   */
+  public GetChatRoomDetailResponse getChatRoomDetail(Long userId, Long chatRoomId) {
+    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
+        () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
+    );
+
+    // 로그인한 회원이 생성한 문의방인지 확인
+    if (!chatRoom.getMember().getId().equals(userId)) {
+      throw new CustomException(ErrorCode.FORBIDDEN);
+    }
+
+    // 해당 문의방의 메시지 목록을 오래된 순서대로 조회
+    List<ChatMessage> messages =
+        chatMessageRepository.findAllByChatRoom_IdOrderByCreatedAtAsc(chatRoomId);
+
+    return GetChatRoomDetailResponse.from(chatRoom, messages);
   }
 }

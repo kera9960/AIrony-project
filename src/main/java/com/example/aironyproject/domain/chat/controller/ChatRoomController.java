@@ -2,6 +2,7 @@ package com.example.aironyproject.domain.chat.controller;
 
 import com.example.aironyproject.common.response.CommonApiResponse;
 import com.example.aironyproject.domain.chat.dto.request.CreateChatRoomRequest;
+import com.example.aironyproject.domain.chat.dto.response.GetChatRoomDetailResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatRoomListResponse;
 import com.example.aironyproject.domain.chat.dto.response.CreateChatRoomResponse;
 import com.example.aironyproject.domain.chat.service.ChatRoomService;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,5 +47,17 @@ public class ChatRoomController {
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(CommonApiResponse.success(HttpStatus.OK, "문의방 목록 조회 성공", response));
+  }
+
+  @GetMapping("/{chatRoomId}")
+  public ResponseEntity<CommonApiResponse<GetChatRoomDetailResponse>> getChatRoomDetail(
+      @AuthenticationPrincipal Long userId,
+      @PathVariable Long chatRoomId
+  ) {
+    GetChatRoomDetailResponse response = chatRoomService.getChatRoomDetail(userId, chatRoomId);
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(CommonApiResponse.success(HttpStatus.OK, "문의방 상세 조회 성공", response));
   }
 }
