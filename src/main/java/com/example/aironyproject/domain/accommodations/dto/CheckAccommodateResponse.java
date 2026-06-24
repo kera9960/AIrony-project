@@ -10,8 +10,9 @@ public record CheckAccommodateResponse (
 		String name,
 		AccommodationStatus status
 ){
-	public CheckAccommodateResponse(Accommodation accommodation){
-		this(accommodation.getPrice(),
+	public static CheckAccommodateResponse from(Accommodation accommodation){
+		return new CheckAccommodateResponse(
+			accommodation.getPrice(),
 			accommodation.getName(),
 			accommodation.getStatus());
 	}

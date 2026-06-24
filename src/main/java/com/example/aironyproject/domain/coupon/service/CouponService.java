@@ -29,7 +29,7 @@ public class CouponService {
 	@Transactional(readOnly = true)
 	public List<GetCouponResponse> getCoupon(){
 		return couponRepository.findAll().stream()
-			.map(GetCouponResponse::new)
+			.map(GetCouponResponse::from)
 			.toList();
 	}
 
@@ -51,6 +51,6 @@ public class CouponService {
 
 		UserCoupon userCoupon = new UserCoupon(user, coupon, LocalDateTime.now(), coupon.getEndedAt());
 		userCouponRepository.save(userCoupon);
-		return new GetCouponResponse(coupon.getName(), coupon.getDiscountAmount(), coupon.getStartedAt(), coupon.getEndedAt());
+		return new GetCouponResponse(coupon.getId(), coupon.getName(), coupon.getDiscountAmount(), coupon.getStartedAt(), coupon.getEndedAt(), coupon.getStatus());
 	}
 }

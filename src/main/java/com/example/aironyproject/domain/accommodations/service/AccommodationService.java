@@ -25,7 +25,7 @@ public class AccommodationService {
 
 	public List<GetAccommodationsResponse> getAccommodations(){
 		return accommodationRepository.findAll().stream()
-			.map(GetAccommodationsResponse::new)
+			.map(GetAccommodationsResponse::from)
 			.toList();
 	}
 

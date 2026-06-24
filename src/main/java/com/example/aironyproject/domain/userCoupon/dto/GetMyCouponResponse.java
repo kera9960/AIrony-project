@@ -11,8 +11,8 @@ public record GetMyCouponResponse(
 	LocalDateTime issuedAt,
 	LocalDateTime expiredAt
 ) {
-	public GetMyCouponResponse(UserCoupon coupon){
-		this(coupon.getId(),
+	public static GetMyCouponResponse from(UserCoupon coupon){
+		return new GetMyCouponResponse(coupon.getId(),
 			 coupon.getCoupon().getName(),
 			 coupon.getCoupon().getDiscountAmount(),
 			 coupon.getIssuedAt(),

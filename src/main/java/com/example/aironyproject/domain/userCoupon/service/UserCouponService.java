@@ -15,9 +15,9 @@ public class UserCouponService {
 	private final UserCouponRepository userCouponRepository;
 
 	@Transactional(readOnly = true)
-	public List<GetMyCouponResponse> getMyCoupon(){
-		return userCouponRepository.findAll().stream()
-			.map(GetMyCouponResponse::new)
+	public List<GetMyCouponResponse> getMyCoupon(Long userId){
+		return userCouponRepository.findByUserId(userId).stream()
+			.map(GetMyCouponResponse::from)
 			.toList();
 	}
 
