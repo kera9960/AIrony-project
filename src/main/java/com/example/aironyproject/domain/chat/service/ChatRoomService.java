@@ -58,15 +58,20 @@ public class ChatRoomService {
         .toList();
   }
 
+  /**
+   * 로그인한 회원이 본인 문의방의 상세 정보와 메시지 목록을 조회
+   */
   public GetChatRoomDetailResponse getChatRoomDetail(Long userId, Long chatRoomId) {
     ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
         () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
     );
 
+    // 로그인한 회원이 생성한 문의방인지 확인
     if (!chatRoom.getMember().getId().equals(userId)) {
       throw new CustomException(ErrorCode.FORBIDDEN);
     }
 
+    // 해당 문의방의 메시지 목록을 오래된 순서대로 조회
     List<ChatMessage> messages =
         chatMessageRepository.findAllByChatRoom_IdOrderByCreatedAtAsc(chatRoomId);
 
