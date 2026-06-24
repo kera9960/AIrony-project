@@ -6,9 +6,11 @@ import com.example.aironyproject.domain.accommodations.entity.Accommodation;
 import com.example.aironyproject.domain.accommodations.entity.AccommodationStatus;
 import com.example.aironyproject.domain.accommodations.repository.AccommodationRepository;
 import com.example.aironyproject.domain.payment.entity.Payment;
+import com.example.aironyproject.domain.payment.repository.PaymentRepository;
 import com.example.aironyproject.domain.payment.service.PaymentService;
 import com.example.aironyproject.domain.reservation.dto.CreateReservationRequest;
 import com.example.aironyproject.domain.reservation.dto.CreateReservationResponse;
+import com.example.aironyproject.domain.reservation.dto.GetDetailReservationResponse;
 import com.example.aironyproject.domain.reservation.dto.GetMyReservationResponse;
 import com.example.aironyproject.domain.reservation.entity.Reservation;
 import com.example.aironyproject.domain.reservation.repository.ReservationRepository;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +39,7 @@ public class ReservationService {
     private final UserCouponRepository  userCouponRepository;
     private final UserRepository userRepository;
     private final PaymentService paymentService;
+    private final PaymentRepository paymentRepository;
 
     @Transactional
     public CreateReservationResponse createReservation(Long userId, CreateReservationRequest request) {
@@ -135,9 +139,15 @@ public class ReservationService {
 
     // 예약번호 발행
     private String generateReservationNumber() {
-        return "RSV-" + UUID.randomUUID()
+        String date = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        String uuid = UUID.randomUUID()
                 .toString()
-                .replaceAll("-", "");
+                .substring(0,6)
+                .toUpperCase();
+
+        return "RSV" + date + "-" + uuid;
     }
 
     public List<GetMyReservationResponse> getMyReservations(Long userId) {
@@ -148,5 +158,21 @@ public class ReservationService {
         return reservations.stream()
                 .map(GetMyReservationResponse::from)
                 .toList();
+    }
+
+    public GetDetailReservationResponse getDetailReservation(Long userId, Long reservationId) {
+
+        // 예약 ID와 사용자 ID를 같이 검증
+        Reservation reservation = reservationRepository.findByIdAndUser_Id(reservationId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
+
+        // 결제 정보 조회
+        Payment payment = paymentRepository.findByReservationId(reservationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
+
+        return GetDetailReservationResponse.from(
+                reservation,
+                payment
+        );
     }
 }

@@ -3,6 +3,7 @@ package com.example.aironyproject.domain.reservation.controller;
 import com.example.aironyproject.common.response.CommonApiResponse;
 import com.example.aironyproject.domain.reservation.dto.CreateReservationRequest;
 import com.example.aironyproject.domain.reservation.dto.CreateReservationResponse;
+import com.example.aironyproject.domain.reservation.dto.GetDetailReservationResponse;
 import com.example.aironyproject.domain.reservation.dto.GetMyReservationResponse;
 import com.example.aironyproject.domain.reservation.entity.Reservation;
 import com.example.aironyproject.domain.reservation.service.ReservationService;
@@ -44,6 +45,20 @@ public class ReservationController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(CommonApiResponse.success(HttpStatus.OK,"내 예약 목록 조회 성공", responses));
+    }
+
+    @GetMapping("/{reservationId}")
+    public ResponseEntity<CommonApiResponse<GetDetailReservationResponse>> getDetailReservation(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long reservationId) {
+
+        GetDetailReservationResponse response = reservationService.getDetailReservation(userId, reservationId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(CommonApiResponse.success(HttpStatus.OK,"예약 상세 조회 성공", response));
+
+
     }
 
 }
