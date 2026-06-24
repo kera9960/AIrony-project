@@ -5,6 +5,8 @@ import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
 import com.example.aironyproject.domain.accommodations.entity.AccommodationStatus;
 import com.example.aironyproject.domain.accommodations.repository.AccommodationRepository;
+import com.example.aironyproject.domain.payment.entity.Payment;
+import com.example.aironyproject.domain.payment.service.PaymentService;
 import com.example.aironyproject.domain.reservation.dto.CreateReservationRequest;
 import com.example.aironyproject.domain.reservation.dto.CreateReservationResponse;
 import com.example.aironyproject.domain.reservation.entity.Reservation;
@@ -31,6 +33,7 @@ public class ReservationService {
     private final AccommodationRepository accommodationRepository;
     private final UserCouponRepository  userCouponRepository;
     private final UserRepository userRepository;
+    private final PaymentService paymentService;
 
     @Transactional
     public CreateReservationResponse createReservation(Long userId, CreateReservationRequest request) {
@@ -88,7 +91,14 @@ public class ReservationService {
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
-        return CreateReservationResponse.from(savedReservation);
+        Payment payment = paymentService.createPayment(
+                savedReservation,
+                savedReservation.getFinalPrice()
+        );
+
+        savedReservation.confirm();
+
+        return CreateReservationResponse.from(savedReservation, payment);
     }
 
     // 선택한 날짜에 이미 예약이 있는지 검증
