@@ -35,7 +35,7 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private UserRole role;
 
-    public User(String email, String password, String name, String phoneNumber, UserRole role) {
+    public User(String email, String password, String name, String phoneNumber) {
         this.email = email;
         this.password = password;
         this.name = name;
