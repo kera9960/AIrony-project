@@ -14,7 +14,7 @@ import com.example.aironyproject.common.response.CommonApiResponse;
 import com.example.aironyproject.domain.accommodations.dto.CheckAccommodateResponse;
 import com.example.aironyproject.domain.accommodations.dto.GetAccommodationsResponse;
 import com.example.aironyproject.domain.accommodations.dto.GetOneAccommodationResponse;
-import com.example.aironyproject.domain.accommodations.entity.AccommodationStatus;
+import com.example.aironyproject.domain.accommodations.enums.AccommodationStatus;
 import com.example.aironyproject.domain.accommodations.service.AccommodationService;
 
 import lombok.RequiredArgsConstructor;

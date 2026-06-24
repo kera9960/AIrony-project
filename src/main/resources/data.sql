@@ -36,15 +36,15 @@ INSERT INTO accommodations (name, address, description, price, status, created_a
 -- ('admin2@admin.com', '$2a$10$7zB3wT.U/7o2x0s0Vp4v2.7/0.0/0.0.0.0.0.0.0.0.0.0.0.0', '관리자2', '010-9999-0002', 'ADMIN', NOW(), NOW());
 --
 --
--- -- 쿠폰
--- INSERT INTO coupons
--- (name, discount_amount, total_quantity, remaining_quantity, started_at, ended_at, status, created_at, updated_at)
--- VALUES
--- ('여름 휴가 지원 1만원 할인 쿠폰', 10000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
--- ('여름 휴가 지원 2만원 할인 쿠폰', 20000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
--- ('여름 휴가 지원 3만원 할인 쿠폰', 30000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
--- ('여름 휴가 지원 4만원 할인 쿠폰', 40000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
--- ('여름 휴가 지원 5만원 할인 쿠폰', 50000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW());
+-- 쿠폰
+INSERT INTO coupons
+(name, discount_amount, total_quantity, remaining_quantity, started_at, ended_at, status, created_at, updated_at)
+VALUES
+('여름 휴가 지원 1만원 할인 쿠폰', 10000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
+('여름 휴가 지원 2만원 할인 쿠폰', 20000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
+('여름 휴가 지원 3만원 할인 쿠폰', 30000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
+('여름 휴가 지원 4만원 할인 쿠폰', 40000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
+('여름 휴가 지원 5만원 할인 쿠폰', 50000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW());
 
 
 

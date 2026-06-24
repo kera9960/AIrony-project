@@ -1,7 +1,7 @@
 package com.example.aironyproject.domain.accommodations.dto;
 
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
-import com.example.aironyproject.domain.accommodations.entity.AccommodationStatus;
+import com.example.aironyproject.domain.accommodations.enums.AccommodationStatus;
 
 
 
@@ -10,8 +10,9 @@ public record CheckAccommodateResponse (
 		String name,
 		AccommodationStatus status
 ){
-	public CheckAccommodateResponse(Accommodation accommodation){
-		this(accommodation.getPrice(),
+	public static CheckAccommodateResponse from(Accommodation accommodation){
+		return new CheckAccommodateResponse(
+			accommodation.getPrice(),
 			accommodation.getName(),
 			accommodation.getStatus());
 	}

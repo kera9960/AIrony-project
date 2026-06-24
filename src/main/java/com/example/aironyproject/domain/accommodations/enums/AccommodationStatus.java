@@ -1,4 +1,4 @@
-package com.example.aironyproject.domain.accommodations.entity;
+package com.example.aironyproject.domain.accommodations.enums;
 
 import com.example.aironyproject.common.exception.CustomException;
 import com.example.aironyproject.common.exception.ErrorCode;

@@ -3,6 +3,7 @@ package com.example.aironyproject.domain.accommodations.entity;
 
 
 import com.example.aironyproject.common.entity.BaseTimeEntity;
+import com.example.aironyproject.domain.accommodations.enums.AccommodationStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;

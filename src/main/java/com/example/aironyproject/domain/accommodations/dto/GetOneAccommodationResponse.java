@@ -1,7 +1,7 @@
 package com.example.aironyproject.domain.accommodations.dto;
 
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
-import com.example.aironyproject.domain.accommodations.entity.AccommodationStatus;
+import com.example.aironyproject.domain.accommodations.enums.AccommodationStatus;
 
 public record GetOneAccommodationResponse(
 	String name,

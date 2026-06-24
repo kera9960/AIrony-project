@@ -11,7 +11,7 @@ import com.example.aironyproject.domain.accommodations.dto.CheckAccommodateRespo
 import com.example.aironyproject.domain.accommodations.dto.GetAccommodationsResponse;
 import com.example.aironyproject.domain.accommodations.dto.GetOneAccommodationResponse;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
-import com.example.aironyproject.domain.accommodations.entity.AccommodationStatus;
+import com.example.aironyproject.domain.accommodations.enums.AccommodationStatus;
 import com.example.aironyproject.domain.accommodations.repository.AccommodationRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class AccommodationService {
 
 	public List<GetAccommodationsResponse> getAccommodations(){
 		return accommodationRepository.findAll().stream()
-			.map(GetAccommodationsResponse::new)
+			.map(GetAccommodationsResponse::from)
 			.toList();
 	}
 

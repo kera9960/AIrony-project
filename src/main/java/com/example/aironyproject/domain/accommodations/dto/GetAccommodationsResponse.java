@@ -9,8 +9,8 @@ public record GetAccommodationsResponse(
 		String name,
 		int price
 ) {
-	public GetAccommodationsResponse(Accommodation accommodation) {
-		this(
+	public static GetAccommodationsResponse from(Accommodation accommodation) {
+		return new GetAccommodationsResponse(
 			accommodation.getId(),
 			accommodation.getName(),
 			accommodation.getPrice()
