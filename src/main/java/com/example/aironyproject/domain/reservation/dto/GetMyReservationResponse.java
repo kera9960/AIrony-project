@@ -12,10 +12,8 @@ public record GetMyReservationResponse(
         String reservationNumber,
         Long accommodationId,
         String accommodationName,
-        String accommodationAddress,
         LocalDate checkInDate,
         LocalDate checkOutDate,
-        int finalPrice,
         ReservationStatus status,
         LocalDateTime createdAt
 ) {
@@ -28,10 +26,8 @@ public record GetMyReservationResponse(
                 reservation.getReservationNumber(),
                 accommodation.getId(),
                 accommodation.getName(),
-                accommodation.getAddress(),
                 reservation.getCheckInDate(),
                 reservation.getCheckOutDate(),
-                reservation.getFinalPrice(),
                 reservation.getStatus(),
                 reservation.getCreatedAt()
         );
