@@ -72,7 +72,7 @@ public class Reservation extends BaseTimeEntity {
             int discountAmount
     ) {
         validCheckOutDate(checkInDate, checkOutDate);
-        validCheckInDate(checkInDate, checkOutDate);
+        validCheckInDate(checkInDate, LocalDate.now());
 
         this.reservationNumber = reservationNumber;
         this.user = user;
