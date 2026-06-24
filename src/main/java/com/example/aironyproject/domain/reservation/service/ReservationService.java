@@ -8,10 +8,9 @@ import com.example.aironyproject.domain.accommodations.repository.AccommodationR
 import com.example.aironyproject.domain.payment.entity.Payment;
 import com.example.aironyproject.domain.payment.repository.PaymentRepository;
 import com.example.aironyproject.domain.payment.service.PaymentService;
-import com.example.aironyproject.domain.reservation.dto.CreateReservationRequest;
-import com.example.aironyproject.domain.reservation.dto.CreateReservationResponse;
-import com.example.aironyproject.domain.reservation.dto.GetDetailReservationResponse;
-import com.example.aironyproject.domain.reservation.dto.GetMyReservationResponse;
+import com.example.aironyproject.domain.refund.entity.Refund;
+import com.example.aironyproject.domain.refund.service.RefundService;
+import com.example.aironyproject.domain.reservation.dto.*;
 import com.example.aironyproject.domain.reservation.entity.Reservation;
 import com.example.aironyproject.domain.reservation.repository.ReservationRepository;
 import com.example.aironyproject.domain.user.entity.User;
@@ -40,6 +39,7 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final PaymentService paymentService;
     private final PaymentRepository paymentRepository;
+    private final RefundService refundService;
 
     @Transactional
     public CreateReservationResponse createReservation(Long userId, CreateReservationRequest request) {
@@ -174,5 +174,33 @@ public class ReservationService {
                 reservation,
                 payment
         );
+    }
+
+    @Transactional
+    public CancelReservationResponse cancelReservation(Long userId, Long reservationId, CancelReservationRequest request) {
+
+        Reservation reservation = reservationRepository.findByIdAndUser_Id(reservationId,userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
+
+        Payment payment = paymentRepository.findByReservationId(reservationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
+
+        // 예약 상태 CANCELED로 변경
+        reservation.cancel();
+        // 결제 상태 REFUNDED로 변경
+        payment.refund();
+
+        // 예약에 쿠폰이 있는지 확인
+        UserCoupon userCoupon = reservation.getUserCoupon();
+
+        // null이 아니면 null로 복구
+        if (userCoupon != null) {
+            userCoupon.restore();
+        }
+
+        // 환불 정보 생성
+        Refund refund = refundService.createRefund(payment, payment.getAmount(), request.reason());
+
+        return CancelReservationResponse.from(reservation, payment, refund);
     }
 }

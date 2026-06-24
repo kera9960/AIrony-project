@@ -1,6 +1,8 @@
 package com.example.aironyproject.domain.payment.entity;
 
 import com.example.aironyproject.common.entity.BaseTimeEntity;
+import com.example.aironyproject.common.exception.CustomException;
+import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.payment.enums.PaymentStatus;
 import com.example.aironyproject.domain.reservation.entity.Reservation;
 import jakarta.persistence.Column;
@@ -63,6 +65,10 @@ public class Payment extends BaseTimeEntity {
    * 예약 취소 시 호출
    */
   public void refund() {
+    if (status == PaymentStatus.REFUNDED) {
+      throw new CustomException(ErrorCode.PAYMENT_ALREADY_REFUNDED);
+    }
+
     this.status = PaymentStatus.REFUNDED;
   }
 }
