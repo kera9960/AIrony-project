@@ -41,7 +41,7 @@ public class UserCoupon {
     @Column(name = "used_at")
     private LocalDateTime usedAt;
 
-    @Column(name = "expired_at")
+    @Column(name = "expired_at", nullable = false)
     private LocalDateTime expiredAt;
 
     public UserCoupon(User user, Coupon coupon, LocalDateTime issuedAt, LocalDateTime expiredAt) {
@@ -78,7 +78,7 @@ public class UserCoupon {
             throw new CustomException(ErrorCode.USER_COUPON_ALREADY_USED);
         }
 
-        if (expiredAt != null && !now.isBefore(expiredAt)) {
+        if (!now.isBefore(expiredAt)) {
             throw new CustomException(ErrorCode.USER_COUPON_EXPIRED);
         }
 
