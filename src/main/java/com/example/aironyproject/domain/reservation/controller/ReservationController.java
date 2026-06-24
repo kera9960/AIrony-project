@@ -1,10 +1,7 @@
 package com.example.aironyproject.domain.reservation.controller;
 
 import com.example.aironyproject.common.response.CommonApiResponse;
-import com.example.aironyproject.domain.reservation.dto.CreateReservationRequest;
-import com.example.aironyproject.domain.reservation.dto.CreateReservationResponse;
-import com.example.aironyproject.domain.reservation.dto.GetDetailReservationResponse;
-import com.example.aironyproject.domain.reservation.dto.GetMyReservationResponse;
+import com.example.aironyproject.domain.reservation.dto.*;
 import com.example.aironyproject.domain.reservation.entity.Reservation;
 import com.example.aironyproject.domain.reservation.service.ReservationService;
 import jakarta.validation.Valid;
@@ -57,8 +54,19 @@ public class ReservationController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(CommonApiResponse.success(HttpStatus.OK,"예약 상세 조회 성공", response));
+    }
 
+    @PatchMapping("/{reservationId}/cancel")
+    public ResponseEntity<CommonApiResponse<CancelReservationResponse>> cancelReservation(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long reservationId,
+            @Valid @RequestBody CancelReservationRequest request) {
 
+        CancelReservationResponse response = reservationService.cancelReservation(userId, reservationId, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(CommonApiResponse.success(HttpStatus.OK,"예약 취소 성공", response));
     }
 
 }
