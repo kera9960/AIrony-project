@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -24,5 +25,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("accommodationId") Long accommodationId,
             @Param("checkInDate") LocalDate checkInDate,
             @Param("checkOutDate") LocalDate checkOutDate
+    );
+
+    @Query("""
+        select r
+        from Reservation r
+        join fetch r.accommodation
+        where r.user.id = :userId
+        order by r.createdAt desc
+        """)
+    List<Reservation> findAllByUserId(
+            @Param("userId") Long userId
     );
 }
