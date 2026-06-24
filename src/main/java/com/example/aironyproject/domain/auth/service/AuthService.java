@@ -5,7 +5,6 @@ import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.user.dto.request.SignupRequest;
 import com.example.aironyproject.domain.user.dto.response.SignupResponse;
 import com.example.aironyproject.domain.user.entity.User;
-import com.example.aironyproject.domain.user.enums.UserRole;
 import com.example.aironyproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
