@@ -84,4 +84,8 @@ public class UserCoupon {
 
         this.usedAt = now;
     }
+
+    public void restore() {
+        this.usedAt = null;
+    }
 }
