@@ -94,9 +94,7 @@ public class Reservation extends BaseTimeEntity {
     // 결제 실패, 예약 취소 또는 환불 완료 시 예약 취소 처리
     public void cancel() {
         if (status == ReservationStatus.CANCELED) {
-            throw new CustomException(
-                    ErrorCode.RESERVATION_ALREADY_CANCELED
-            );
+            throw new CustomException(ErrorCode.RESERVATION_ALREADY_CANCELED);
         }
 
         changeStatus(ReservationStatus.CANCELED);
