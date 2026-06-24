@@ -1,6 +1,7 @@
 package com.example.aironyproject.domain.user.entity;
 
 import com.example.aironyproject.common.entity.BaseTimeEntity;
+import com.example.aironyproject.domain.user.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
