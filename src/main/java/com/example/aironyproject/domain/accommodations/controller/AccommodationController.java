@@ -20,33 +20,34 @@ import com.example.aironyproject.domain.accommodations.service.AccommodationServ
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/accommodations")
 @RequiredArgsConstructor
 public class AccommodationController {
 
 	private final AccommodationService accommodationService;
 
-	@GetMapping("/accommodations")
+	@GetMapping
 	public ResponseEntity<CommonApiResponse<List<GetAccommodationsResponse>>> getAccommodations(){
 		List<GetAccommodationsResponse> data = accommodationService.getAccommodations();
 
 		return ResponseEntity.status(HttpStatus.OK).body(CommonApiResponse.success(HttpStatus.OK, "숙소 목록 조회 성공", data));
 	}
 
-	@GetMapping("/accommodations/{accommodationId}")
+	@GetMapping("/{accommodationId}")
 	public ResponseEntity<CommonApiResponse<GetOneAccommodationResponse>> getOneAccommodation(@PathVariable Long accommodationId){
 		GetOneAccommodationResponse data = accommodationService.getOneAccommodation(accommodationId);
 
 		return ResponseEntity.status(HttpStatus.OK).body(CommonApiResponse.success(HttpStatus.OK, "숙소 상세 조회 성공",  data));
 	}
 
-	@GetMapping("/accommodations/search")
-	public ResponseEntity<List<CheckAccommodateResponse>> checkAccommodation(
+	@GetMapping("/search")
+	public ResponseEntity<CommonApiResponse<List<CheckAccommodateResponse>>> checkAccommodation(
 		@RequestParam(required = false) Integer price,
 		@RequestParam(required = false) String name,
 		@RequestParam(required = false)AccommodationStatus status
 	){
-		return ResponseEntity.status(HttpStatus.OK).body(accommodationService.checkingAccommodationWithQuery(price, name, status));
+		List<CheckAccommodateResponse> data = accommodationService.checkingAccommodationWithQuery(price, name, status);
+		return ResponseEntity.status(HttpStatus.OK).body(CommonApiResponse.success(HttpStatus.OK, "숙소 검색 성공", data));
 	}
 
 }

@@ -7,7 +7,7 @@ public record GetOneAccommodationResponse(
 	String name,
 	String address,
 	String description,
-	String price,
+	int price,
 	AccommodationStatus status
 ) {
 	public static GetOneAccommodationResponse from(Accommodation accommodation){
@@ -15,7 +15,7 @@ public record GetOneAccommodationResponse(
 			accommodation.getName(),
 			accommodation.getAddress(),
 			accommodation.getDescription(),
-			accommodation.getPrice() + " / 박",
+			accommodation.getPrice(),
 			accommodation.getStatus()
 		);
 	}

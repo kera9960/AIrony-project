@@ -3,6 +3,7 @@ package com.example.aironyproject.domain.accommodations.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.aironyproject.common.exception.CustomException;
 import com.example.aironyproject.common.exception.ErrorCode;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AccommodationService {
 
 	private final AccommodationRepository accommodationRepository;
