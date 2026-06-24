@@ -13,12 +13,12 @@ import com.example.aironyproject.domain.user.entity.User;
 import com.example.aironyproject.domain.user.repository.UserRepository;
 import com.example.aironyproject.domain.userCoupon.entity.UserCoupon;
 import com.example.aironyproject.domain.userCoupon.repository.UserCouponRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
@@ -65,8 +65,15 @@ public class ReservationService {
         // 할인 전 가격 계산
         int originalPrice = Math.multiplyExact(accommodation.getPrice(), nights);
 
-        // 쿠폰이 없으면 할인금액은 0원
-        int discountAmount = userCoupon == null ? 0 : userCoupon.calculateDiscount(originalPrice);
+        int discountAmount = 0;
+
+        // 쿠폰이 null인지 검증하고
+        if (userCoupon != null) {
+            discountAmount = userCoupon.calculateDiscount(originalPrice);
+
+            // 있으면 사용 시간을 기록해서 사용 완료 처리 하기
+            userCoupon.use(LocalDateTime.now());
+        }
 
         Reservation reservation = new Reservation(
                 generateReservationNumber(),
