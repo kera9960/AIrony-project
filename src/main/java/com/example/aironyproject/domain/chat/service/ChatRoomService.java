@@ -5,9 +5,12 @@ import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
 import com.example.aironyproject.domain.accommodations.repository.AccommodationRepository;
 import com.example.aironyproject.domain.chat.dto.request.CreateChatRoomRequest;
-import com.example.aironyproject.domain.chat.dto.response.GetChatRoomListResponse;
 import com.example.aironyproject.domain.chat.dto.response.CreateChatRoomResponse;
+import com.example.aironyproject.domain.chat.dto.response.GetChatRoomDetailResponse;
+import com.example.aironyproject.domain.chat.dto.response.GetChatRoomListResponse;
+import com.example.aironyproject.domain.chat.entity.ChatMessage;
 import com.example.aironyproject.domain.chat.entity.ChatRoom;
+import com.example.aironyproject.domain.chat.repository.ChatMessageRepository;
 import com.example.aironyproject.domain.chat.repository.ChatRoomRepository;
 import com.example.aironyproject.domain.user.entity.User;
 import com.example.aironyproject.domain.user.repository.UserRepository;
@@ -24,6 +27,7 @@ public class ChatRoomService {
   private final ChatRoomRepository chatRoomRepository;
   private final UserRepository userRepository;
   private final AccommodationRepository accommodationRepository;
+  private final ChatMessageRepository chatMessageRepository;
 
   @Transactional
   public CreateChatRoomResponse createChatRoom(Long userId, CreateChatRoomRequest request) {
@@ -52,5 +56,20 @@ public class ChatRoomService {
         .stream()
         .map(GetChatRoomListResponse::from)
         .toList();
+  }
+
+  public GetChatRoomDetailResponse getChatRoomDetail(Long userId, Long chatRoomId) {
+    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
+        () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
+    );
+
+    if (!chatRoom.getMember().getId().equals(userId)) {
+      throw new CustomException(ErrorCode.FORBIDDEN);
+    }
+
+    List<ChatMessage> messages =
+        chatMessageRepository.findAllByChatRoom_IdOrderByCreatedAtAsc(chatRoomId);
+
+    return GetChatRoomDetailResponse.from(chatRoom, messages);
   }
 }
