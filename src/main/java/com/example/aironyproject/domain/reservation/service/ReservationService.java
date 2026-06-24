@@ -9,6 +9,7 @@ import com.example.aironyproject.domain.payment.entity.Payment;
 import com.example.aironyproject.domain.payment.service.PaymentService;
 import com.example.aironyproject.domain.reservation.dto.CreateReservationRequest;
 import com.example.aironyproject.domain.reservation.dto.CreateReservationResponse;
+import com.example.aironyproject.domain.reservation.dto.GetMyReservationResponse;
 import com.example.aironyproject.domain.reservation.entity.Reservation;
 import com.example.aironyproject.domain.reservation.repository.ReservationRepository;
 import com.example.aironyproject.domain.user.entity.User;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -136,5 +138,15 @@ public class ReservationService {
         return "RSV-" + UUID.randomUUID()
                 .toString()
                 .replaceAll("-", "");
+    }
+
+    public List<GetMyReservationResponse> getMyReservations(Long userId) {
+
+        // 예약을 최신순으로 조회
+        List<Reservation> reservations = reservationRepository.findAllByUserId(userId);
+
+        return reservations.stream()
+                .map(GetMyReservationResponse::from)
+                .toList();
     }
 }
