@@ -35,6 +35,10 @@ public class ChatRoom extends BaseTimeEntity {
   @JoinColumn(name = "member_id")
   private User member;
 
+  /**
+   * 문의를 담당하는 관리자
+   * 문의 생성 시에는 null이며, 상담 시작 시 배정
+   */
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "admin_id")
   private User admin;
@@ -57,6 +61,9 @@ public class ChatRoom extends BaseTimeEntity {
     this.status = ChatRoomStatus.WAITING;
   }
 
+  /**
+   * 관리자를 배정하고 문의 상태를 상담 진행 중으로 변경
+   */
   public void assignAdmin(User admin) {
     if (this.admin != null) {
       throw new CustomException(ErrorCode.CHAT_ROOM_ALREADY_ASSIGNED);
@@ -70,6 +77,9 @@ public class ChatRoom extends BaseTimeEntity {
     this.status = ChatRoomStatus.IN_PROGRESS;
   }
 
+  /**
+   * 문의 상태를 상담 완료로 변경
+   */
   public void complete() {
     if (this.status != ChatRoomStatus.IN_PROGRESS) {
       throw new CustomException(ErrorCode.CHAT_ROOM_ALREADY_COMPLETED);

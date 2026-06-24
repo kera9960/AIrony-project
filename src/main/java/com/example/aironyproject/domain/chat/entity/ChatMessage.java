@@ -39,6 +39,9 @@ public class ChatMessage {
   @Column(nullable = false, length = 1000)
   private String content;
 
+  /**
+   * 일반 메시지와 시스템 메시지를 구분
+   */
   @Enumerated(EnumType.STRING)
   @Column(name = "message_type", nullable = false, length = 20)
   private MessageType messageType;
@@ -49,6 +52,9 @@ public class ChatMessage {
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
 
+  /**
+   * 일반 텍스트 메시지를 생성
+   */
   public ChatMessage(
       ChatRoom chatRoom,
       User sender,
