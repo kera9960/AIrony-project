@@ -3,6 +3,8 @@ package com.example.aironyproject.domain.coupon.entity;
 import com.example.aironyproject.common.entity.BaseTimeEntity;
 import com.example.aironyproject.common.exception.CustomException;
 import com.example.aironyproject.common.exception.ErrorCode;
+import com.example.aironyproject.domain.coupon.enums.CouponStatus;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

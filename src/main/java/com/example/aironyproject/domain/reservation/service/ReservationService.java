@@ -3,7 +3,7 @@ package com.example.aironyproject.domain.reservation.service;
 import com.example.aironyproject.common.exception.CustomException;
 import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
-import com.example.aironyproject.domain.accommodations.entity.AccommodationStatus;
+import com.example.aironyproject.domain.accommodations.enums.AccommodationStatus;
 import com.example.aironyproject.domain.accommodations.repository.AccommodationRepository;
 import com.example.aironyproject.domain.reservation.dto.CreateReservationRequest;
 import com.example.aironyproject.domain.reservation.dto.CreateReservationResponse;

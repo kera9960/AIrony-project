@@ -1,4 +1,4 @@
-package com.example.aironyproject.domain.coupon.entity;
+package com.example.aironyproject.domain.coupon.enums;
 
 public enum CouponStatus {
 

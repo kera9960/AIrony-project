@@ -7,8 +7,7 @@ import java.util.List;
 import org.springframework.util.StringUtils;
 
 import com.example.aironyproject.domain.accommodations.dto.CheckAccommodateResponse;
-import com.example.aironyproject.domain.accommodations.entity.AccommodationStatus;
-import com.example.aironyproject.domain.accommodations.entity.QAccommodation;
+import com.example.aironyproject.domain.accommodations.enums.AccommodationStatus;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
