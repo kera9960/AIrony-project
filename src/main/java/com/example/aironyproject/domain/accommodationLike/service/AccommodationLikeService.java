@@ -42,4 +42,13 @@ public class AccommodationLikeService {
 
         return CreateAccommodationLikeResponse.from(savedLike);
     }
+
+    @Transactional
+    public void cancelLike(Long userId, Long accommodationId) {
+        AccommodationLike accommodationLike = accommodationLikeRepository
+                .findByUser_IdAndAccommodation_Id(userId, accommodationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ACCOMMODATION_LIKE_NOT_FOUND));
+
+        accommodationLikeRepository.delete(accommodationLike);
+    }
 }
