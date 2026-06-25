@@ -5,6 +5,7 @@ import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
 import com.example.aironyproject.domain.accommodations.repository.AccommodationRepository;
 import com.example.aironyproject.domain.chat.dto.request.CreateChatRoomRequest;
+import com.example.aironyproject.domain.chat.dto.response.AcceptChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.CreateChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatRoomDetailResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatRoomListResponse;
@@ -112,5 +113,35 @@ public class ChatRoomService {
     return chatRooms.stream()
         .map(GetChatRoomListResponse::from)
         .toList();
+  }
+
+  /**
+   * 관리자 문의 수락
+   *
+   * 로그인한 사용자가 ADMIN 권한인지 확인한 뒤,
+   * WAITING 상태의 문의방에 현재 관리자를 배정하고
+   * 문의 상태를 IN_PROGRESS로 변경
+   *
+   * @param userId 로그인한 사용자 ID
+   * @param chatRoomId 수락할 문의방 ID
+   * @return 수락된 문의방 정보
+   */
+  @Transactional
+  public AcceptChatRoomResponse acceptChatRoom(Long userId, Long chatRoomId) {
+    User admin = userRepository.findById(userId).orElseThrow(
+        () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+    );
+
+    if (!admin.getRole().equals(UserRole.ADMIN)) {
+      throw new CustomException(ErrorCode.FORBIDDEN);
+    }
+
+    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
+        () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
+    );
+
+    chatRoom.assignAdmin(admin);
+
+    return AcceptChatRoomResponse.from(chatRoom);
   }
 }
