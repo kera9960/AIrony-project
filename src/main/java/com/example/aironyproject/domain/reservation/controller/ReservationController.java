@@ -1,5 +1,6 @@
 package com.example.aironyproject.domain.reservation.controller;
 
+import com.example.aironyproject.common.redisson.facade.ReservationLockFacade;
 import com.example.aironyproject.common.response.CommonApiResponse;
 import com.example.aironyproject.domain.reservation.dto.*;
 import com.example.aironyproject.domain.reservation.entity.Reservation;
@@ -19,13 +20,14 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationLockFacade reservationLockFacade;
 
     @PostMapping
     public ResponseEntity<CommonApiResponse<CreateReservationResponse>> createReservation(
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody CreateReservationRequest request) {
 
-        CreateReservationResponse response = reservationService.createReservation(userId, request);
+        CreateReservationResponse response = reservationLockFacade.reserveRoom(userId, request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
