@@ -36,7 +36,7 @@ class ReservationConcurrencyTest {
 	@DisplayName("100명이 동시에 같은 숙소, 같은 날짜를 예약하면 딱 1명만 성공해야 한다.")
 	void reserveRoom_concurrency_test() throws InterruptedException {
 		// =================================================================
-		// 1. 테스트용 필수 데이터 준비 (엔티티 생성자에 맞춰서 수정 완료!)
+		// 1. 테스트용 필수 데이터 준비
 		// =================================================================
 
 		// 1) 가짜 유저 생성 (email, password, name, phoneNumber 순서)
