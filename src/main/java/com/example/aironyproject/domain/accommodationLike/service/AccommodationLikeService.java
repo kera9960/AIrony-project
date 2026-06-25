@@ -3,6 +3,7 @@ package com.example.aironyproject.domain.accommodationLike.service;
 import com.example.aironyproject.common.exception.CustomException;
 import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.accommodationLike.dto.CreateAccommodationLikeResponse;
+import com.example.aironyproject.domain.accommodationLike.dto.GetMyAccommodationLikeResponse;
 import com.example.aironyproject.domain.accommodationLike.entity.AccommodationLike;
 import com.example.aironyproject.domain.accommodationLike.repository.AccommodationLikeRepository;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
@@ -12,6 +13,8 @@ import com.example.aironyproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -50,5 +53,15 @@ public class AccommodationLikeService {
                 .orElseThrow(() -> new CustomException(ErrorCode.ACCOMMODATION_LIKE_NOT_FOUND));
 
         accommodationLikeRepository.delete(accommodationLike);
+    }
+
+    public List<GetMyAccommodationLikeResponse> getMyAccommodationLike(Long userId) {
+
+        List<AccommodationLike> accommodationLikes =
+                accommodationLikeRepository.findAllByUser_IdOrderByCreatedAtDesc(userId);
+
+        return accommodationLikes.stream()
+                .map(GetMyAccommodationLikeResponse::from)
+                .toList();
     }
 }
