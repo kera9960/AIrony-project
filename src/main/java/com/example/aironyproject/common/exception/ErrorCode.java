@@ -17,6 +17,7 @@ public enum ErrorCode {
 
   // 403 FORBIDDEN
   FORBIDDEN(HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다."),
+  CHAT_MESSAGE_NOT_ALLOWED(HttpStatus.FORBIDDEN, "CHAT_MESSAGE_NOT_ALLOWED", "메시지를 보낼 수 없는 문의 상태입니다."),
 
   // 404 NOT_FOUND
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "회원을 찾을 수 없습니다."),
@@ -45,7 +46,6 @@ public enum ErrorCode {
   INVALID_RESERVATION_STATUS(HttpStatus.CONFLICT, "INVALID_RESERVATION_STATUS", "변경할 수 없는 예약 상태입니다."),
   CHAT_ROOM_ALREADY_ASSIGNED(HttpStatus.CONFLICT, "CHAT_ROOM_ALREADY_ASSIGNED", "이미 담당자가 배정된 문의입니다."),
   CHAT_ROOM_ALREADY_COMPLETED(HttpStatus.CONFLICT, "CHAT_ROOM_ALREADY_COMPLETED", "이미 완료된 문의입니다."),
-  CHAT_MESSAGE_NOT_ALLOWED(HttpStatus.CONFLICT, "CHAT_MESSAGE_NOT_ALLOWED", "메시지를 보낼 수 없는 문의 상태입니다."),
   ACCOMMODATION_ALREADY_LIKED(HttpStatus.CONFLICT, "ACCOMMODATION_ALREADY_LIKED", "이미 찜한 숙소입니다."),
 
   // 500 INTERNAL_SERVER_ERROR
