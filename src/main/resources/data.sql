@@ -28,7 +28,7 @@ INSERT INTO accommodations (name, address, description, price, status, created_a
 ('수원 행궁동 감성 게스트하우스', '경기도 수원시 팔달구 화서문로 42', '행리단길 카페거리 중심에 위치한 아기자기한 게하', 45000, 'INACTIVE', NOW(), NOW()); -- INACTIVE 4
 
 --
-INSERT INTO users (email, password, name, phone_number, role, created_at, updated_at) VALUES
+INSERT IGNORE INTO users (email, password, name, phone_number, role, created_at, updated_at) VALUES
 -- -- 비밀번호 password123!
 --
 -- -- ADMIN 계정
