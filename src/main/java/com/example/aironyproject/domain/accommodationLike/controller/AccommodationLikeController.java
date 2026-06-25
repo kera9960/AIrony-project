@@ -2,12 +2,15 @@ package com.example.aironyproject.domain.accommodationLike.controller;
 
 import com.example.aironyproject.common.response.CommonApiResponse;
 import com.example.aironyproject.domain.accommodationLike.dto.CreateAccommodationLikeResponse;
+import com.example.aironyproject.domain.accommodationLike.dto.GetMyAccommodationLikeResponse;
 import com.example.aironyproject.domain.accommodationLike.service.AccommodationLikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,5 +41,16 @@ public class AccommodationLikeController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(CommonApiResponse.success(HttpStatus.OK,"찜 취소 성공", null));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<CommonApiResponse<List<GetMyAccommodationLikeResponse>>> getMyAccommodationLike(
+            @AuthenticationPrincipal Long userId) {
+
+        List<GetMyAccommodationLikeResponse> responses = accommodationLikeService.getMyAccommodationLike(userId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(CommonApiResponse.success(HttpStatus.OK,"내 찜 목록 조회 성공", responses));
     }
 }
