@@ -7,6 +7,8 @@ import com.example.aironyproject.domain.accommodations.repository.AccommodationR
 import com.example.aironyproject.domain.chat.dto.request.CreateChatRoomRequest;
 import com.example.aironyproject.domain.chat.dto.response.AcceptChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.CreateChatRoomResponse;
+import com.example.aironyproject.domain.chat.dto.response.GetChatMessageResponse;
+import com.example.aironyproject.domain.chat.dto.response.GetChatMessagesResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatRoomDetailResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatRoomListResponse;
 import com.example.aironyproject.domain.chat.entity.ChatMessage;
@@ -19,6 +21,8 @@ import com.example.aironyproject.domain.user.enums.UserRole;
 import com.example.aironyproject.domain.user.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,7 +66,7 @@ public class ChatRoomService {
   }
 
   /**
-   * 로그인한 회원이 본인 문의방의 상세 정보와 메시지 목록을 조회
+   * 로그인한 회원이 본인 문의방의 상세 정보를 조회
    */
   public GetChatRoomDetailResponse getChatRoomDetail(Long userId, Long chatRoomId) {
     ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
@@ -74,11 +78,7 @@ public class ChatRoomService {
       throw new CustomException(ErrorCode.FORBIDDEN);
     }
 
-    // 해당 문의방의 메시지 목록을 오래된 순서대로 조회
-    List<ChatMessage> messages =
-        chatMessageRepository.findAllByChatRoom_IdOrderByCreatedAtAsc(chatRoomId);
-
-    return GetChatRoomDetailResponse.from(chatRoom, messages);
+    return GetChatRoomDetailResponse.from(chatRoom);
   }
 
   /**
@@ -143,5 +143,78 @@ public class ChatRoomService {
     chatRoom.assignAdmin(admin);
 
     return AcceptChatRoomResponse.from(chatRoom);
+  }
+
+  /**
+   * 커서 기반 메시지 목록 조회
+   *
+   * 채팅방에 접근 가능한 사용자인지 확인
+   * cursor 기준으로 이전 메시지를 size 개수만큼 조회
+   *
+   * cursor가 없으면 채팅방 첫 진입으로 보고 최신 메시지를 조회
+   * cursor가 있으면 해당 메시지 ID보다 오래된 메시지를 조회
+   */
+  public GetChatMessagesResponse getChatMessages(
+      Long userId,
+      Long chatRoomId,
+      Long cursor,
+      int size
+  ) {
+
+    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
+        () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
+    );
+
+    // 문의를 생성한 회원 또는 배정된 관리자만 메시지를 조회
+    boolean isOwner = chatRoom.getMember().getId().equals(userId);
+
+    boolean isAssignedAdmin = chatRoom.getAdmin() != null && chatRoom.getAdmin().getId().equals(userId);
+
+    if (!isOwner && !isAssignedAdmin) {
+      throw new CustomException(ErrorCode.FORBIDDEN);
+    }
+
+
+    // 한 번에 조회할 메세지 개수(size)보다 1개 더 조회
+    // size보다 많이 조회되면 이전 메세지가 더 존재한다는 뜻으로 hasNext 판단 가능
+    Pageable pageable = PageRequest.of(0, size + 1);
+
+    List<ChatMessage> messages;
+
+    // cursor가 없으면 채팅방 첫 진입으로 판단하여, 최신 메세지부터 size + 1개 조회
+    if (cursor == null) {
+      messages = chatMessageRepository.findAllByChatRoom_IdOrderByIdDesc(
+          chatRoomId,
+          pageable
+      );
+    } else {
+      // cursor로 전달된 메세지 ID보다 작은 ID(더 오래된 메세지)를 조회
+      messages = chatMessageRepository.findAllByChatRoom_IdAndIdLessThanOrderByIdDesc(
+          chatRoomId,
+          cursor,
+          pageable
+      );
+    }
+
+
+    // 전체 메세지 개수가 아니라 이번 조회 결과 개수를 기준으로 판단
+    // size + 1개를 조회했을 때 size보다 많이 조회되면 이전 메세지가 더 있다는 의미
+    boolean hasNext = messages.size() > size;
+
+    // hasNext 판단을 위해 추가로 가져온 1개는 실제 응답에서 제외
+    if (hasNext) {
+      messages = messages.subList(0, size);
+    }
+
+    List<GetChatMessageResponse> responses = messages.stream()
+        .map(GetChatMessageResponse::from)
+        .toList();
+
+
+    // 다음 조회에 사용할 cursor를 계산
+    // 현재 응답 메세지 중 가장 오래된 메세지 ID를 nextCursor로 초기화
+    Long nextCursor = messages.isEmpty() ? null : messages.get(messages.size() - 1).getId();
+
+    return new GetChatMessagesResponse(responses, nextCursor, hasNext);
   }
 }
