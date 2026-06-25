@@ -22,12 +22,12 @@ public class ReservationLockFacade {
 	private final ReservationService reservationService;
 
 	public CreateReservationResponse reserveRoom(Long userId, CreateReservationRequest request){
-		String lockKey = "lock:accommodation" + request.accommodationId() + ":date:" + request.checkInDate();
+		String lockKey = "lock:accommodation:" + request.accommodationId();
 
 		RLock lock = redissonClient.getLock(lockKey);
 
 		try{
-			boolean avaliable = lock.tryLock(5, 3, TimeUnit.SECONDS);
+			boolean avaliable = lock.tryLock(5, TimeUnit.SECONDS);
 
 			if(!avaliable){
 				throw new CustomException(ErrorCode.ALREADY_RESERVED_DATE);

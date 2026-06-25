@@ -27,7 +27,7 @@ public class RedissionConfig {
 			.setConnectionMinimumIdleSize(5)
 			.setConnectionPoolSize(10)
 			.setIdleConnectionTimeout(100000)
-			.setConnectTimeout(3000)
+			.setConnectTimeout(5000)
 			.setRetryAttempts(5)
 			.setRetryInterval(1500);
 		return Redisson.create(config);
