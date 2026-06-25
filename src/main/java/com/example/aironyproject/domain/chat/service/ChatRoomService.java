@@ -10,9 +10,11 @@ import com.example.aironyproject.domain.chat.dto.response.GetChatRoomDetailRespo
 import com.example.aironyproject.domain.chat.dto.response.GetChatRoomListResponse;
 import com.example.aironyproject.domain.chat.entity.ChatMessage;
 import com.example.aironyproject.domain.chat.entity.ChatRoom;
+import com.example.aironyproject.domain.chat.enums.ChatRoomStatus;
 import com.example.aironyproject.domain.chat.repository.ChatMessageRepository;
 import com.example.aironyproject.domain.chat.repository.ChatRoomRepository;
 import com.example.aironyproject.domain.user.entity.User;
+import com.example.aironyproject.domain.user.enums.UserRole;
 import com.example.aironyproject.domain.user.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -76,5 +78,39 @@ public class ChatRoomService {
         chatMessageRepository.findAllByChatRoom_IdOrderByCreatedAtAsc(chatRoomId);
 
     return GetChatRoomDetailResponse.from(chatRoom, messages);
+  }
+
+  /**
+   * 관리자 문의방 목록 조회
+   * 로그인한 사용자가 ADMIN 권한인지 확인한 뒤,
+   * 문의방 목록을 생성일 기준 최신순으로 조회
+   *
+   * status 값이 없으면 전체 문의방을 조회
+   * status 값이 있으면 해당 상태의 문의방만 조회
+   *
+   * @param userId 로그인한 사용자 ID
+   * @param status 조회할 문의방 상태, 없으면 전체 조회
+   * @return 관리자 문의방 목록
+   */
+  public List<GetChatRoomListResponse> getAdminChatRooms(Long userId, ChatRoomStatus status) {
+    User user = userRepository.findById(userId).orElseThrow(
+        () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+    );
+
+    if (!user.getRole().equals(UserRole.ADMIN)) {
+      throw new CustomException(ErrorCode.FORBIDDEN);
+    }
+
+    List<ChatRoom> chatRooms;
+
+    if (status == null) {
+      chatRooms = chatRoomRepository.findAllByOrderByCreatedAtDesc();
+    } else {
+      chatRooms = chatRoomRepository.findAllByStatusOrderByCreatedAtDesc(status);
+    }
+
+    return chatRooms.stream()
+        .map(GetChatRoomListResponse::from)
+        .toList();
   }
 }
