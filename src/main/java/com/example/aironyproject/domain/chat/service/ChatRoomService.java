@@ -5,14 +5,17 @@ import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
 import com.example.aironyproject.domain.accommodations.repository.AccommodationRepository;
 import com.example.aironyproject.domain.chat.dto.request.CreateChatRoomRequest;
+import com.example.aironyproject.domain.chat.dto.response.AcceptChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.CreateChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatRoomDetailResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatRoomListResponse;
 import com.example.aironyproject.domain.chat.entity.ChatMessage;
 import com.example.aironyproject.domain.chat.entity.ChatRoom;
+import com.example.aironyproject.domain.chat.enums.ChatRoomStatus;
 import com.example.aironyproject.domain.chat.repository.ChatMessageRepository;
 import com.example.aironyproject.domain.chat.repository.ChatRoomRepository;
 import com.example.aironyproject.domain.user.entity.User;
+import com.example.aironyproject.domain.user.enums.UserRole;
 import com.example.aironyproject.domain.user.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -76,5 +79,69 @@ public class ChatRoomService {
         chatMessageRepository.findAllByChatRoom_IdOrderByCreatedAtAsc(chatRoomId);
 
     return GetChatRoomDetailResponse.from(chatRoom, messages);
+  }
+
+  /**
+   * 관리자 문의방 목록 조회
+   * 로그인한 사용자가 ADMIN 권한인지 확인한 뒤,
+   * 문의방 목록을 생성일 기준 최신순으로 조회
+   *
+   * status 값이 없으면 전체 문의방을 조회
+   * status 값이 있으면 해당 상태의 문의방만 조회
+   *
+   * @param userId 로그인한 사용자 ID
+   * @param status 조회할 문의방 상태, 없으면 전체 조회
+   * @return 관리자 문의방 목록
+   */
+  public List<GetChatRoomListResponse> getAdminChatRooms(Long userId, ChatRoomStatus status) {
+    User user = userRepository.findById(userId).orElseThrow(
+        () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+    );
+
+    if (!user.getRole().equals(UserRole.ADMIN)) {
+      throw new CustomException(ErrorCode.FORBIDDEN);
+    }
+
+    List<ChatRoom> chatRooms;
+
+    if (status == null) {
+      chatRooms = chatRoomRepository.findAllByOrderByCreatedAtDesc();
+    } else {
+      chatRooms = chatRoomRepository.findAllByStatusOrderByCreatedAtDesc(status);
+    }
+
+    return chatRooms.stream()
+        .map(GetChatRoomListResponse::from)
+        .toList();
+  }
+
+  /**
+   * 관리자 문의 수락
+   *
+   * 로그인한 사용자가 ADMIN 권한인지 확인한 뒤,
+   * WAITING 상태의 문의방에 현재 관리자를 배정하고
+   * 문의 상태를 IN_PROGRESS로 변경
+   *
+   * @param userId 로그인한 사용자 ID
+   * @param chatRoomId 수락할 문의방 ID
+   * @return 수락된 문의방 정보
+   */
+  @Transactional
+  public AcceptChatRoomResponse acceptChatRoom(Long userId, Long chatRoomId) {
+    User admin = userRepository.findById(userId).orElseThrow(
+        () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+    );
+
+    if (!admin.getRole().equals(UserRole.ADMIN)) {
+      throw new CustomException(ErrorCode.FORBIDDEN);
+    }
+
+    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
+        () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
+    );
+
+    chatRoom.assignAdmin(admin);
+
+    return AcceptChatRoomResponse.from(chatRoom);
   }
 }

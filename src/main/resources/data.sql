@@ -28,12 +28,12 @@ INSERT INTO accommodations (name, address, description, price, status, created_a
 ('수원 행궁동 감성 게스트하우스', '경기도 수원시 팔달구 화서문로 42', '행리단길 카페거리 중심에 위치한 아기자기한 게하', 45000, 'INACTIVE', NOW(), NOW()); -- INACTIVE 4
 
 --
--- INSERT INTO users (email, password, name, phone_number, role, created_at, updated_at) VALUES
+INSERT IGNORE INTO users (email, password, name, phone_number, role, created_at, updated_at) VALUES
 -- -- 비밀번호 password123!
 --
 -- -- ADMIN 계정
--- ('admin1@admin.com', '$2a$10$7zB3wT.U/7o2x0s0Vp4v2.7/0.0/0.0.0.0.0.0.0.0.0.0.0.0', '관리자1', '010-9999-0001', 'ADMIN', NOW(), NOW()),
--- ('admin2@admin.com', '$2a$10$7zB3wT.U/7o2x0s0Vp4v2.7/0.0/0.0.0.0.0.0.0.0.0.0.0.0', '관리자2', '010-9999-0002', 'ADMIN', NOW(), NOW());
+('admin1@admin.com', '$2a$12$Y7XcX0tiyBY2xNa9QstLE.DhyJG0a2zfEX8tx11v7lkLXnH4x9QGG', '관리자1', '010-9999-0001', 'ADMIN', NOW(), NOW()),
+('admin2@admin.com', '$2a$12$Y7XcX0tiyBY2xNa9QstLE.DhyJG0a2zfEX8tx11v7lkLXnH4x9QGG', '관리자2', '010-9999-0002', 'ADMIN', NOW(), NOW());
 --
 --
 -- 쿠폰
