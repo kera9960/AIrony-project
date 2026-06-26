@@ -174,4 +174,76 @@ class ReservationConcurrencyTest {
 		assertThat(successCount.get()).isEqualTo(1);
 		assertThat(failCount.get()).isEqualTo(1);
 	}
+
+	@Test
+	@DisplayName("서로 전혀 겹치지 않는 날짜로 동시에 예약하면 방해받지 않고 둘 다 성공해야 한다.")
+	void reserveRoom_non_overlapping_concurrency_test() throws InterruptedException {
+		// =================================================================
+		// 1. 유저 2명과 테스트용 숙소 준비
+		// =================================================================
+		User user1 = userRepository.save(new User("test3@test.com", "pw123!", "유저3", "010-3333-3333"));
+		User user2 = userRepository.save(new User("test4@test.com", "pw123!", "유저4", "010-4444-4444"));
+
+		Accommodation accommodation = accommodationRepository.save(
+			new Accommodation("비연박 독립 테스트 펜션", "주소", "설명", 100000, AccommodationStatus.ACTIVE)
+		);
+
+		// =================================================================
+		// 2. 전혀 겹치지 않는 요청서 2개 생성
+		// =================================================================
+		// 유저1: 12월 25일 ~ 12월 28일 (3박: 25, 26, 27일 락 획득 시도)
+		CreateReservationRequest request1 = new CreateReservationRequest(
+			accommodation.getId(), null, LocalDate.of(2026, 12, 25), LocalDate.of(2026, 12, 28)
+		);
+
+		// 유저2: 12월 29일 ~ 12월 31일 (2박: 29, 30일 락 획득 시도 - 유저1과 전혀 안 겹침!)
+		CreateReservationRequest request2 = new CreateReservationRequest(
+			accommodation.getId(), null, LocalDate.of(2026, 12, 29), LocalDate.of(2026, 12, 31)
+		);
+
+		int threadCount = 2;
+		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+		CountDownLatch latch = new CountDownLatch(threadCount);
+
+		AtomicInteger successCount = new AtomicInteger();
+		AtomicInteger failCount = new AtomicInteger();
+
+		// =================================================================
+		// 3. 두 유저가 동시에 예약 버튼 클릭!
+		// =================================================================
+		executorService.submit(() -> {
+			try {
+				reservationLockFacade.reserveRoom(user1.getId(), request1);
+				successCount.incrementAndGet();
+			} catch (Exception e) {
+				failCount.incrementAndGet();
+			} finally {
+				latch.countDown();
+			}
+		});
+
+		executorService.submit(() -> {
+			try {
+				reservationLockFacade.reserveRoom(user2.getId(), request2);
+				successCount.incrementAndGet();
+			} catch (Exception e) {
+				failCount.incrementAndGet();
+			} finally {
+				latch.countDown();
+			}
+		});
+
+		latch.await();
+
+		// =================================================================
+		// 4. 최종 결과 검증
+		// =================================================================
+		System.out.println("====== 겹치지 않는 날짜 테스트 결과 ======");
+		System.out.println("✅ 성공한 예약 횟수: " + successCount.get());
+		System.out.println("❌ 실패한 예약 횟수: " + failCount.get());
+
+		// 날짜가 전혀 겹치지 않으므로 MultiLock이 서로 방해하지 않고 둘 다 성공해야 함!
+		assertThat(successCount.get()).isEqualTo(2);
+		assertThat(failCount.get()).isEqualTo(0);
+	}
 }
