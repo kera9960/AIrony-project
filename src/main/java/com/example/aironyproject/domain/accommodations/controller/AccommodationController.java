@@ -42,12 +42,13 @@ public class AccommodationController {
 
 	@GetMapping("/search")
 	public ResponseEntity<CommonApiResponse<List<CheckAccommodateResponse>>> checkAccommodation(
+		@RequestParam(required = false) String region,
 		@RequestParam(required = false) Integer minPrice,
 		@RequestParam(required = false) Integer maxPrice,
 		@RequestParam(required = false) String name,
 		@RequestParam(required = false)AccommodationStatus status
 	){
-		List<CheckAccommodateResponse> data = accommodationService.checkingAccommodationWithQuery(minPrice, maxPrice, name, status);
+		List<CheckAccommodateResponse> data = accommodationService.checkingAccommodationWithQuery(region, minPrice, maxPrice, name, status);
 		return ResponseEntity.status(HttpStatus.OK).body(CommonApiResponse.success(HttpStatus.OK, "숙소 검색 성공", data));
 	}
 

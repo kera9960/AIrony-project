@@ -7,5 +7,5 @@ import com.example.aironyproject.domain.accommodations.enums.AccommodationStatus
 
 public interface AccommodationCustomRepository {
 
-	List<CheckAccommodateResponse> findByOption(Integer minPrice, Integer maxPrice, String name, AccommodationStatus status);
+	List<CheckAccommodateResponse> findByOption(String region, Integer minPrice, Integer maxPrice, String name, AccommodationStatus status);
 }
