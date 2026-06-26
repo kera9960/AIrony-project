@@ -2,6 +2,8 @@ package com.example.aironyproject.domain.accommodations.controller;
 
 import java.util.List;
 
+import com.example.aironyproject.domain.accommodationLike.dto.PopularAccommodationDto;
+import com.example.aironyproject.domain.accommodationLike.service.AccommodationLikeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class AccommodationController {
 
 	private final AccommodationService accommodationService;
+	private final AccommodationLikeService accommodationLikeService;
 
 	@GetMapping
 	public ResponseEntity<CommonApiResponse<List<GetAccommodationsResponse>>> getAccommodations(){
@@ -49,6 +52,16 @@ public class AccommodationController {
 	){
 		List<CheckAccommodateResponse> data = accommodationService.checkingAccommodationWithQuery(minPrice, maxPrice, name, status);
 		return ResponseEntity.status(HttpStatus.OK).body(CommonApiResponse.success(HttpStatus.OK, "숙소 검색 성공", data));
+	}
+
+	@GetMapping("/popular-accommodations")
+	public ResponseEntity<CommonApiResponse<List<PopularAccommodationDto>>> getPopularAccommodations() {
+
+		List<PopularAccommodationDto> responses = accommodationLikeService.getPopularAccommodations();
+
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(CommonApiResponse.success(HttpStatus.OK, "인기 숙소 목록 조회 성공", responses));
 	}
 
 }

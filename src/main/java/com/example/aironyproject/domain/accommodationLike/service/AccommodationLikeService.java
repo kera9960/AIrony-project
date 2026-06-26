@@ -4,6 +4,7 @@ import com.example.aironyproject.common.exception.CustomException;
 import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.accommodationLike.dto.CreateAccommodationLikeResponse;
 import com.example.aironyproject.domain.accommodationLike.dto.GetMyAccommodationLikeResponse;
+import com.example.aironyproject.domain.accommodationLike.dto.PopularAccommodationDto;
 import com.example.aironyproject.domain.accommodationLike.entity.AccommodationLike;
 import com.example.aironyproject.domain.accommodationLike.repository.AccommodationLikeRepository;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
@@ -63,5 +64,10 @@ public class AccommodationLikeService {
         return accommodationLikes.stream()
                 .map(GetMyAccommodationLikeResponse::from)
                 .toList();
+    }
+
+    public List<PopularAccommodationDto> getPopularAccommodations() {
+
+        return accommodationLikeRepository.findPopularAccommodation();
     }
 }
