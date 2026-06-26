@@ -5,6 +5,7 @@ import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
 import com.example.aironyproject.domain.accommodations.repository.AccommodationRepository;
 import com.example.aironyproject.domain.chat.dto.request.CreateChatRoomRequest;
+import com.example.aironyproject.domain.chat.dto.request.SendChatMessageRequest;
 import com.example.aironyproject.domain.chat.dto.response.AcceptChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.CreateChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatMessageResponse;
@@ -216,5 +217,72 @@ public class ChatRoomService {
     Long nextCursor = messages.isEmpty() ? null : messages.get(messages.size() - 1).getId();
 
     return new GetChatMessagesResponse(responses, nextCursor, hasNext);
+  }
+
+  /**
+   * 채팅방에 새로운 메시지 전송
+   *
+   * @param chatRoomId 메시지를 전송할 채팅방 ID
+   * @param senderId 메시지를 전송한 회원 ID
+   * @param request 메시지 전송 요청 정보
+   * @return 저장된 메시지 정보
+   */
+  @Transactional
+  public GetChatMessageResponse sendMessage(
+      Long chatRoomId,
+      Long senderId,
+      SendChatMessageRequest request
+  ) {
+    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
+        () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
+    );
+
+    User user = userRepository.findById(senderId).orElseThrow(
+        () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+    );
+
+    validateParticipant(chatRoom, user);
+    validateSendable(chatRoom);
+
+    ChatMessage chatMessage = new ChatMessage(
+        chatRoom,
+        user,
+        request.content()
+    );
+
+    ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
+
+    return GetChatMessageResponse.from(savedChatMessage);
+  }
+
+  /**
+   * 메시지를 전송하려는 사용자가 해당 채팅방의 참여자인지 검증
+   * 문의 생성 회원 또는 배정된 관리자만 메시지 전송 가능
+   *
+   * @param chatRoom 검증할 채팅방
+   * @param user 메시지를 전송하려는 사용자
+   */
+  private void validateParticipant(ChatRoom chatRoom, User user) {
+
+    boolean isMember = chatRoom.getMember().getId().equals(user.getId());
+
+    boolean isAdmin = chatRoom.getAdmin() != null && chatRoom.getAdmin().getId().equals(user.getId());
+
+    if (!isMember && !isAdmin) {
+      throw new CustomException(ErrorCode.FORBIDDEN);
+    }
+  }
+
+  /**
+   * 채팅방 상태가 메시지 전송 가능한 상태인지 검증
+   * 진행 중(IN_PROGRESS) 상태의 문의방에서만 메시지 전송 가능
+   *
+   * @param chatRoom 검증할 채팅방
+   */
+  private void validateSendable(ChatRoom chatRoom) {
+
+    if (chatRoom.getStatus() != ChatRoomStatus.IN_PROGRESS) {
+      throw new CustomException(ErrorCode.CHAT_MESSAGE_NOT_ALLOWED);
+    }
   }
 }
