@@ -20,7 +20,7 @@ public class AccommodationRepositoryImpl implements AccommodationCustomRepositor
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public List<CheckAccommodateResponse> findByOption(Integer price, String name, AccommodationStatus status) {
+	public List<CheckAccommodateResponse> findByOption(Integer minPrice, Integer maxPrice, String name, AccommodationStatus status) {
 		return jpaQueryFactory
 			.select(Projections.constructor(CheckAccommodateResponse.class,
 				accommodation.price,
@@ -28,16 +28,22 @@ public class AccommodationRepositoryImpl implements AccommodationCustomRepositor
 				accommodation.status))
 			.from(accommodation)
 			.where(
-				accommodationPriceEq(price),
+				accommodationPriceGoe(minPrice),// 이상, 이하 추가
+				accommodationPriceLoe(maxPrice),
 				accommodationNameContains(name),
 				accommodationStatusEq(status)
 			)
 			.orderBy(accommodation.id.asc())
 			.fetch();
 	}
+	// 최소 가격 이상
+	private BooleanExpression accommodationPriceGoe(Integer minPrice){
+		return minPrice != null ? accommodation.price.goe(minPrice) : null;
+	}
 
-	private BooleanExpression accommodationPriceEq(Integer price){
-		return price != null ? accommodation.price.eq(price) : null;
+	// 최대 가격 이하
+	private BooleanExpression accommodationPriceLoe(Integer maxPrice){
+		return maxPrice != null ? accommodation.price.loe(maxPrice) : null;
 	}
 
 	private BooleanExpression accommodationNameContains(String name){
