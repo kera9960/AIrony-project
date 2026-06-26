@@ -1,6 +1,6 @@
 package com.example.aironyproject.domain.accommodationLike.repository;
 
-import com.example.aironyproject.domain.accommodationLike.dto.PopularAccommodationDto;
+import com.example.aironyproject.domain.accommodationLike.dto.PopularAccommodationResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +16,12 @@ public class AccommodationLikeRepositoryImpl implements AccommodationLikeCustomR
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<PopularAccommodationDto> findPopularAccommodation() {
+    public List<PopularAccommodationResponse> findPopularAccommodation() {
         return jpaQueryFactory
-                .select(Projections.constructor(PopularAccommodationDto.class,
+                .select(Projections.constructor(PopularAccommodationResponse.class,
                         accommodation.id,
-                        accommodation.name))
+                        accommodation.name,
+                        accommodationLike.id.count()))
                 .from(accommodationLike)
                 .join(accommodationLike.accommodation, accommodation)
                 .groupBy(accommodation.id)

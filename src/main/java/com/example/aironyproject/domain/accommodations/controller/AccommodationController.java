@@ -2,7 +2,7 @@ package com.example.aironyproject.domain.accommodations.controller;
 
 import java.util.List;
 
-import com.example.aironyproject.domain.accommodationLike.dto.PopularAccommodationDto;
+import com.example.aironyproject.domain.accommodationLike.dto.PopularAccommodationResponse;
 import com.example.aironyproject.domain.accommodationLike.service.AccommodationLikeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,9 +55,9 @@ public class AccommodationController {
 	}
 
 	@GetMapping("/popular-accommodations")
-	public ResponseEntity<CommonApiResponse<List<PopularAccommodationDto>>> getPopularAccommodations() {
+	public ResponseEntity<CommonApiResponse<List<PopularAccommodationResponse>>> getPopularAccommodations() {
 
-		List<PopularAccommodationDto> responses = accommodationLikeService.getPopularAccommodations();
+		List<PopularAccommodationResponse> responses = accommodationLikeService.getPopularAccommodations();
 
 		return ResponseEntity
 				.status(HttpStatus.OK)

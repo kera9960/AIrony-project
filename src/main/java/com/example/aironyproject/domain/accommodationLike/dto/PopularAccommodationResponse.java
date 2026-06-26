@@ -1,7 +1,8 @@
 package com.example.aironyproject.domain.accommodationLike.dto;
 
-public record PopularAccommodationDto(
+public record PopularAccommodationResponse(
         Long accommodationId,
-        String accommodationName
+        String accommodationName,
+        Long likeCount
 ) {
 }
