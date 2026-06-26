@@ -29,7 +29,7 @@ public class Accommodation extends BaseTimeEntity {
 	private Long id;
 
 	// 지역 컬럼 추가
-	@Column
+	@Column(nullable = false)
 	private String region;
 
 	// 숙소명
