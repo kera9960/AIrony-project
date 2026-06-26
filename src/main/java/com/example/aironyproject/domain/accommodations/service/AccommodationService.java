@@ -41,7 +41,7 @@ public class AccommodationService {
 	 * 최소 가격이 최대 가격보다 큰지 검증
 	 * 검증을 통과 했을때만 조회 실행
 	 */
-	public List<CheckAccommodateResponse> checkingAccommodationWithQuery(Integer minPrice, Integer maxPrice, String name, AccommodationStatus status){
+	public List<CheckAccommodateResponse> checkingAccommodationWithQuery(String region, Integer minPrice, Integer maxPrice, String name, AccommodationStatus status){
 
 		if ((minPrice != null && minPrice < 0) || (maxPrice != null && maxPrice < 0)){
 			throw new CustomException(ErrorCode.NEGATIVE_PRICE_NOT_ALLOWED);
@@ -51,6 +51,6 @@ public class AccommodationService {
 			throw new CustomException(ErrorCode.INVALID_PRICE_RANGE);
 		}
 
-		return accommodationRepository.findByOption(minPrice, maxPrice, name, status);
+		return accommodationRepository.findByOption(region, minPrice, maxPrice, name, status);
 	}
 }

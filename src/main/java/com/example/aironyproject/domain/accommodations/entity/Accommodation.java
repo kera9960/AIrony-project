@@ -28,6 +28,10 @@ public class Accommodation extends BaseTimeEntity {
 	// 숙소 ID
 	private Long id;
 
+	// 지역 컬럼 추가
+	@Column(nullable = false)
+	private String region;
+
 	// 숙소명
 	@Column(nullable = false)
 	private String name;
@@ -49,7 +53,8 @@ public class Accommodation extends BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	private AccommodationStatus status;
 
-	public Accommodation(String name, String address, String description, int price, AccommodationStatus status){
+	public Accommodation(String region,String name, String address, String description, int price, AccommodationStatus status){
+		this.region = region;
 		this.name = name;
 		this.address = address;
 		this.description = description;

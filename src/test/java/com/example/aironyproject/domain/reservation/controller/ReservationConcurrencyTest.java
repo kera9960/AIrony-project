@@ -51,6 +51,7 @@ class ReservationConcurrencyTest {
 
 		// 2) 가짜 숙소 생성 (name, address, description, price, status 순서)
 		Accommodation accommodation = new Accommodation(
+				"제주",
 			"제주도 동시성 테스트 펜션",
 			"제주특별자치도 제주시",
 			"동시성 테스트를 위한 가짜 펜션입니다.",
