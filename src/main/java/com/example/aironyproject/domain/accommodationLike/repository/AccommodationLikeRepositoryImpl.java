@@ -1,6 +1,7 @@
 package com.example.aironyproject.domain.accommodationLike.repository;
 
 import com.example.aironyproject.domain.accommodationLike.dto.PopularAccommodationResponse;
+import com.example.aironyproject.domain.accommodations.enums.AccommodationStatus;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class AccommodationLikeRepositoryImpl implements AccommodationLikeCustomR
                         accommodationLike.id.count()))
                 .from(accommodationLike)
                 .join(accommodationLike.accommodation, accommodation)
+                .where(accommodation.status.eq(AccommodationStatus.ACTIVE)) // 예약 가능 숙소만 노출
                 .groupBy(accommodation.id)
                 .orderBy(
                         accommodationLike.id.count().desc(), // 찜 수가 많은 순서로 정렬
