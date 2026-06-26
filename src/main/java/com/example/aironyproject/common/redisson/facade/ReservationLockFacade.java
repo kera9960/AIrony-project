@@ -1,5 +1,7 @@
 package com.example.aironyproject.common.redisson.facade;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.redisson.api.RLock;
@@ -22,12 +24,19 @@ public class ReservationLockFacade {
 	private final ReservationService reservationService;
 
 	public CreateReservationResponse reserveRoom(Long userId, CreateReservationRequest request){
-		String lockKey = "lock:accommodation:" + request.accommodationId();
+		List<LocalDate> dates = request.checkInDate().datesUntil(request.checkOutDate()).toList();
 
-		RLock lock = redissonClient.getLock(lockKey);
+		RLock[] locks = new RLock[dates.size()];
+
+		for(int i=0; i<dates.size(); i++){
+			String lockKey = "lock:accommodation:" + request.accommodationId() + ":date:" + dates.get(i);
+			locks[i] = redissonClient.getLock(lockKey);
+		}
+
+		RLock multiLock = redissonClient.getMultiLock(locks);
 
 		try{
-			boolean avaliable = lock.tryLock(5, TimeUnit.SECONDS);
+			boolean avaliable = multiLock.tryLock(5, TimeUnit.SECONDS);
 
 			if(!avaliable){
 				throw new CustomException(ErrorCode.ALREADY_RESERVED_DATE);
@@ -35,10 +44,13 @@ public class ReservationLockFacade {
 
 			return reservationService.createReservation(userId, request);
 		}catch (InterruptedException e){
+			Thread.currentThread().interrupt();
 			throw new RuntimeException("락 획득 중 인터럽트 발생");
 		} finally {
-			if(lock.isLocked() && lock.isHeldByCurrentThread()){
-				lock.unlock();
+			try{
+				multiLock.unlock();
+			}catch (IllegalMonitorStateException e){
+
 			}
 		}
 	}
