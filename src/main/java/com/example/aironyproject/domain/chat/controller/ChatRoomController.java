@@ -2,6 +2,9 @@ package com.example.aironyproject.domain.chat.controller;
 
 import com.example.aironyproject.common.response.CommonApiResponse;
 import com.example.aironyproject.domain.chat.dto.request.CreateChatRoomRequest;
+import com.example.aironyproject.domain.chat.dto.request.SendChatMessageRequest;
+import com.example.aironyproject.domain.chat.dto.response.GetChatMessageResponse;
+import com.example.aironyproject.domain.chat.dto.response.GetChatMessagesResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatRoomDetailResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatRoomListResponse;
 import com.example.aironyproject.domain.chat.dto.response.CreateChatRoomResponse;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -60,4 +64,33 @@ public class ChatRoomController {
         .status(HttpStatus.OK)
         .body(CommonApiResponse.success(HttpStatus.OK, "문의방 상세 조회 성공", response));
   }
+
+  @GetMapping("/{chatRoomId}/messages")
+  public ResponseEntity<CommonApiResponse<GetChatMessagesResponse>> getChatMessages(
+      @AuthenticationPrincipal Long userId,
+      @PathVariable Long chatRoomId,
+      @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "20") int size
+  ) {
+    GetChatMessagesResponse response = chatRoomService.getChatMessages(userId, chatRoomId, cursor, size);
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(CommonApiResponse.success(HttpStatus.OK, "메세지 목록 조회 성공", response));
+  }
+
+  @PostMapping("/{chatRoomId}/messages")
+  public ResponseEntity<CommonApiResponse<GetChatMessageResponse>> sendMessage(
+      @AuthenticationPrincipal Long userId,
+      @PathVariable Long chatRoomId,
+      @Valid @RequestBody SendChatMessageRequest request
+  ) {
+    GetChatMessageResponse response = chatRoomService.sendMessage(chatRoomId, userId, request);
+
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(CommonApiResponse.success(HttpStatus.CREATED, "메세지 전송 성공", response));
+  }
+
+
 }
