@@ -20,7 +20,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-//@Disabled("채팅 성능 확인용 테스트")
+@Disabled("채팅 성능 확인용 테스트")
 @SpringBootTest
 public class ChatMessagePerformanceTest {
 
