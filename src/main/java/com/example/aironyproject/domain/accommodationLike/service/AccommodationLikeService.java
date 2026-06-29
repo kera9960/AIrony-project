@@ -12,7 +12,6 @@ import com.example.aironyproject.domain.accommodations.repository.AccommodationR
 import com.example.aironyproject.domain.user.entity.User;
 import com.example.aironyproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +25,7 @@ public class AccommodationLikeService {
     private final AccommodationLikeRepository accommodationLikeRepository;
     private final AccommodationRepository accommodationRepository;
     private final UserRepository userRepository;
+    private final AccommodationLikeCacheService accommodationLikeCacheService;
 
     @Transactional
     public CreateAccommodationLikeResponse createLike(Long userId, Long accommodationId) {
@@ -67,9 +67,24 @@ public class AccommodationLikeService {
                 .toList();
     }
 
-    @Cacheable(value = "popularAccommodations", key = "'top10'")
     public List<PopularAccommodationResponse> getPopularAccommodations() {
+        // 1. 캐시가 있는 지 확인
+        List<PopularAccommodationResponse> cachedPopularAccommodations =
+                accommodationLikeCacheService.getTop10PopularAccommodations();
 
-        return accommodationLikeRepository.findPopularAccommodation();
+        // 2. 캐시가 있으면 Redis 캐시 반환
+        if(cachedPopularAccommodations != null) {
+            return cachedPopularAccommodations;
+        }
+
+        // 3. 캐시가 없으면 DB에서 직접 조회
+        List<PopularAccommodationResponse> popularAccommodations =
+                accommodationLikeRepository.findPopularAccommodation();
+
+        // 4. DB에서 직접 조회한 값을 캐시에 저장
+        accommodationLikeCacheService.savePopularAccommodations(popularAccommodations);
+
+        // 5. DB 조회 결과 반환
+        return popularAccommodations;
     }
 }
