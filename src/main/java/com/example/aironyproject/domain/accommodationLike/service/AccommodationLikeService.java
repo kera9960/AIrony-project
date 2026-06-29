@@ -12,6 +12,7 @@ import com.example.aironyproject.domain.accommodations.repository.AccommodationR
 import com.example.aironyproject.domain.user.entity.User;
 import com.example.aironyproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,6 +67,7 @@ public class AccommodationLikeService {
                 .toList();
     }
 
+    @Cacheable(value = "popularAccommodations", key = "'top10'")
     public List<PopularAccommodationResponse> getPopularAccommodations() {
 
         return accommodationLikeRepository.findPopularAccommodation();
