@@ -262,9 +262,9 @@ public class ChatRoomService {
         () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
     );
 
-    User user = userRepository.findById(senderId).orElseThrow(
-        () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-    );
+    // User 엔티티 전체 조회가 필요하지 않아 프록시 객체를 반환하는
+    // getReferenceById()를 사용하여 DB 조회를 지연시킴
+    User user = userRepository.getReferenceById(senderId);
 
     validateParticipant(chatRoom, user);
     chatRoom.validateMessageSendable();
