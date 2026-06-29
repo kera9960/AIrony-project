@@ -35,7 +35,7 @@ public class AccommodationRepositoryImpl implements AccommodationCustomRepositor
 				accommodationNameContains(name),
 				accommodationStatusEq(status)
 			)
-			.orderBy(accommodation.id.asc())
+			.orderBy(accommodation.price.asc())
 			.fetch();
 	}
 
