@@ -2,6 +2,7 @@ package com.example.aironyproject.domain.chat.controller;
 
 import com.example.aironyproject.common.response.CommonApiResponse;
 import com.example.aironyproject.domain.chat.dto.response.AcceptChatRoomResponse;
+import com.example.aironyproject.domain.chat.dto.response.CompleteChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatRoomListResponse;
 import com.example.aironyproject.domain.chat.enums.ChatRoomStatus;
 import com.example.aironyproject.domain.chat.service.ChatRoomService;
@@ -52,6 +53,18 @@ public class AdminChatRoomController {
 
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(CommonApiResponse.success(HttpStatus.OK,"문의 수락 성공", response));
+        .body(CommonApiResponse.success(HttpStatus.OK, "문의 수락 성공", response));
+  }
+
+  @PatchMapping("/{chatRoomId}/complete")
+  public ResponseEntity<CommonApiResponse<CompleteChatRoomResponse>> completeChatRoom(
+      @AuthenticationPrincipal Long userId,
+      @PathVariable Long chatRoomId
+  ) {
+    CompleteChatRoomResponse response = chatRoomService.completeChatRoom(userId, chatRoomId);
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(CommonApiResponse.success(HttpStatus.OK, "문의 완료 성공", response));
   }
 }

@@ -7,6 +7,7 @@ import com.example.aironyproject.domain.accommodations.repository.AccommodationR
 import com.example.aironyproject.domain.chat.dto.request.CreateChatRoomRequest;
 import com.example.aironyproject.domain.chat.dto.request.SendChatMessageRequest;
 import com.example.aironyproject.domain.chat.dto.response.AcceptChatRoomResponse;
+import com.example.aironyproject.domain.chat.dto.response.CompleteChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.CreateChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatMessageResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatMessagesResponse;
@@ -146,6 +147,30 @@ public class ChatRoomService {
     return AcceptChatRoomResponse.from(chatRoom);
   }
 
+  @Transactional
+  public CompleteChatRoomResponse completeChatRoom(Long userId, Long chatRoomId) {
+    User admin = userRepository.findById(userId).orElseThrow(
+        () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+    );
+
+    if (!admin.getRole().equals(UserRole.ADMIN)) {
+      throw new CustomException(ErrorCode.FORBIDDEN);
+    }
+
+    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
+        () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
+    );
+
+    if (chatRoom.getAdmin() == null ||
+        !chatRoom.getAdmin().getId().equals(admin.getId())) {
+      throw new CustomException(ErrorCode.FORBIDDEN);
+    }
+
+    chatRoom.complete();
+
+    return CompleteChatRoomResponse.from(chatRoom);
+  }
+
   /**
    * 커서 기반 메시지 목록 조회
    *
@@ -242,7 +267,7 @@ public class ChatRoomService {
     );
 
     validateParticipant(chatRoom, user);
-    validateSendable(chatRoom);
+    chatRoom.validateMessageSendable();
 
     ChatMessage chatMessage = new ChatMessage(
         chatRoom,
@@ -270,19 +295,6 @@ public class ChatRoomService {
 
     if (!isMember && !isAdmin) {
       throw new CustomException(ErrorCode.FORBIDDEN);
-    }
-  }
-
-  /**
-   * 채팅방 상태가 메시지 전송 가능한 상태인지 검증
-   * 진행 중(IN_PROGRESS) 상태의 문의방에서만 메시지 전송 가능
-   *
-   * @param chatRoom 검증할 채팅방
-   */
-  private void validateSendable(ChatRoom chatRoom) {
-
-    if (chatRoom.getStatus() != ChatRoomStatus.IN_PROGRESS) {
-      throw new CustomException(ErrorCode.CHAT_MESSAGE_NOT_ALLOWED);
     }
   }
 }
