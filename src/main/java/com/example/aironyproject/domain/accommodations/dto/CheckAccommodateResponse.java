@@ -6,6 +6,7 @@ import com.example.aironyproject.domain.accommodations.enums.AccommodationStatus
 
 
 public record CheckAccommodateResponse (
+		Long id, // 식별자 추가
 		String region,
 		int price,
 		String name,
@@ -13,6 +14,7 @@ public record CheckAccommodateResponse (
 ){
 	public static CheckAccommodateResponse from(Accommodation accommodation){
 		return new CheckAccommodateResponse(
+			accommodation.getId(),
 			accommodation.getRegion(),
 			accommodation.getPrice(),
 			accommodation.getName(),

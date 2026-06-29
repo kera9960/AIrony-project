@@ -23,6 +23,7 @@ public class AccommodationRepositoryImpl implements AccommodationCustomRepositor
 	public List<CheckAccommodateResponse> findByOption(String region,Integer minPrice, Integer maxPrice, String name, AccommodationStatus status) {
 		return jpaQueryFactory
 			.select(Projections.constructor(CheckAccommodateResponse.class,
+				accommodation.id, // 식별자 추가
 				accommodation.region,
 				accommodation.price,
 				accommodation.name,
