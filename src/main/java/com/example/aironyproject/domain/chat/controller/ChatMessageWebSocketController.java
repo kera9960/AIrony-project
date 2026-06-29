@@ -3,6 +3,7 @@ package com.example.aironyproject.domain.chat.controller;
 import com.example.aironyproject.domain.chat.dto.request.SendChatMessageRequest;
 import com.example.aironyproject.domain.chat.dto.response.GetChatMessageResponse;
 import com.example.aironyproject.domain.chat.service.ChatRoomService;
+import jakarta.validation.Valid;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -21,7 +22,7 @@ public class ChatMessageWebSocketController {
   @MessageMapping("/chat-rooms/{chatRoomId}/messages")
   public void sendMessage(
       @DestinationVariable Long chatRoomId,
-      @Payload SendChatMessageRequest request,
+      @Valid @Payload SendChatMessageRequest request,
       Principal principal
   ) {
     Long userId = Long.valueOf(principal.getName());
