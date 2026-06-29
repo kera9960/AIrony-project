@@ -4,6 +4,7 @@ import com.example.aironyproject.common.exception.CustomException;
 import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
 import com.example.aironyproject.domain.accommodations.repository.AccommodationRepository;
+import com.example.aironyproject.domain.chat.dto.projection.ChatRoomSendValidationProjection;
 import com.example.aironyproject.domain.chat.dto.request.CreateChatRoomRequest;
 import com.example.aironyproject.domain.chat.dto.request.SendChatMessageRequest;
 import com.example.aironyproject.domain.chat.dto.response.AcceptChatRoomResponse;
@@ -258,16 +259,24 @@ public class ChatRoomService {
       Long senderId,
       SendChatMessageRequest request
   ) {
-    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
-        () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
-    );
+    ChatRoomSendValidationProjection validation =
+        chatRoomRepository.findSendValidationProjectionById(chatRoomId).orElseThrow(
+            () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
+        );
+
+    // Projection으로 조회한 memberId/adminId를 기준으로 메시지 전송자가 채팅방 참여자인지 검증
+    validateParticipant(validation, senderId);
+
+    // Projection으로 조회한 status를 기준으로 메시지 전송 가능한 상태인지 검증
+    validateMessageSendable(validation);
+
+    // 채팅방 참여자와 상태 검증은 Projection으로 이미 완료
+    // 메시지 저장에 필요한 chatRoomId는 프록시 객체로 참조하여 불필요한 조회를 줄임
+    ChatRoom chatRoom = chatRoomRepository.getReferenceById(chatRoomId);
 
     // User 엔티티 전체 조회가 필요하지 않아 프록시 객체를 반환하는
-    // getReferenceById()를 사용하여 DB 조회를 지연시킴
+    // getReferenceById()를 사용하여 DB 조회를 줄임
     User user = userRepository.getReferenceById(senderId);
-
-    validateParticipant(chatRoom, user);
-    chatRoom.validateMessageSendable();
 
     ChatMessage chatMessage = new ChatMessage(
         chatRoom,
@@ -284,17 +293,30 @@ public class ChatRoomService {
    * 메시지를 전송하려는 사용자가 해당 채팅방의 참여자인지 검증
    * 문의 생성 회원 또는 배정된 관리자만 메시지 전송 가능
    *
-   * @param chatRoom 검증할 채팅방
-   * @param user 메시지를 전송하려는 사용자
+   * @param validation 메시지 전송 검증에 필요한 채팅방 정보
+   * @param senderId 메시지를 전송하려는 사용자
    */
-  private void validateParticipant(ChatRoom chatRoom, User user) {
+  private void validateParticipant(ChatRoomSendValidationProjection validation, Long senderId) {
 
-    boolean isMember = chatRoom.getMember().getId().equals(user.getId());
+    boolean isMember = validation.memberId().equals(senderId);
 
-    boolean isAdmin = chatRoom.getAdmin() != null && chatRoom.getAdmin().getId().equals(user.getId());
+    boolean isAdmin = validation.adminId() != null &&
+                      validation.adminId().equals(senderId);
 
     if (!isMember && !isAdmin) {
       throw new CustomException(ErrorCode.FORBIDDEN);
+    }
+  }
+
+  /**
+   * Projection으로 조회한 채팅방 정보를 기준으로 메시지 전송 가능 상태인지 검증
+   * 진행 중(IN_PROGRESS) 상태의 문의방에서만 메시지 전송 가능
+   *
+   * @param validation 메시지 전송 검증에 필요한 채팅방 정보
+   */
+  private void validateMessageSendable(ChatRoomSendValidationProjection validation) {
+    if (validation.status() != ChatRoomStatus.IN_PROGRESS) {
+      throw new CustomException(ErrorCode.CHAT_MESSAGE_NOT_ALLOWED);
     }
   }
 }
