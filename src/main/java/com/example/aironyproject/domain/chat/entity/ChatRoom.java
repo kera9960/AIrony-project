@@ -87,4 +87,10 @@ public class ChatRoom extends BaseTimeEntity {
 
     this.status = ChatRoomStatus.COMPLETED;
   }
+
+  public void validateMessageSendable() {
+    if (this.status != ChatRoomStatus.IN_PROGRESS) {
+      throw new CustomException(ErrorCode.CHAT_MESSAGE_NOT_ALLOWED);
+    }
+  }
 }
