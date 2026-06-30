@@ -16,6 +16,7 @@ public enum ErrorCode {
   INVALID_RESERVATION_PRICE(HttpStatus.BAD_REQUEST, "INVALID_RESERVATION_PRICE", "예약 금액이 올바르지 않습니다."),
   INVALID_PRICE_RANGE(HttpStatus.BAD_REQUEST,"INVALID_PRICE_RANGE","최소 가격이 최대 가격보다 클 수 없습니다."),
   NEGATIVE_PRICE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "NEGATIVE_PRICE_NOT_ALLOWED", "가격은 0원 이상이어야 합니다."),
+  ACCOMMODATION_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "ACCOMMODATION_NOT_ACTIVE", "이용 가능한 숙소가 아닙니다."),
 
   // 403 FORBIDDEN
   FORBIDDEN(HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다."),
@@ -31,6 +32,7 @@ public enum ErrorCode {
   USER_COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_COUPON_NOT_FOUND", "보유 쿠폰을 찾을 수 없습니다."),
   CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT_ROOM_NOT_FOUND", "문의방을 찾을 수 없습니다."),
   ACCOMMODATION_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "ACCOMMODATION_LIKE_NOT_FOUND", "찜한 숙소를 찾을 수 없습니다."),
+
 
   // 409 CONFLICT
   EMAIL_DUPLICATE(HttpStatus.CONFLICT, "EMAIL_DUPLICATE", "이미 사용 중인 이메일입니다."),
