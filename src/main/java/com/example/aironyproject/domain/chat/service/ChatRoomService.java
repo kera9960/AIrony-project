@@ -10,6 +10,7 @@ import com.example.aironyproject.domain.chat.dto.request.SendChatMessageRequest;
 import com.example.aironyproject.domain.chat.dto.response.AcceptChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.CompleteChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.CreateChatRoomResponse;
+import com.example.aironyproject.domain.chat.dto.response.GetAdminChatRoomsResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatMessageResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatMessagesResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatRoomDetailResponse;
@@ -23,6 +24,7 @@ import com.example.aironyproject.domain.user.entity.User;
 import com.example.aironyproject.domain.user.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -84,28 +86,35 @@ public class ChatRoomService {
   }
 
   /**
-   * 관리자 문의방 목록 조회
-   * 로그인한 사용자가 ADMIN 권한인지 확인한 뒤,
-   * 문의방 목록을 생성일 기준 최신순으로 조회
-   *
-   * status 값이 없으면 전체 문의방을 조회
-   * status 값이 있으면 해당 상태의 문의방만 조회
+   * 관리자 문의방 목록을 페이지 단위로 조회
    *
    * @param status 조회할 문의방 상태, 없으면 전체 조회
-   * @return 관리자 문의방 목록
+   * @param page 조회할 페이지 번호
+   * @param size 한 페이지에 조회할 문의방 개수
+   * @return 페이지 정보가 포함된 관리자 문의방 목록
    */
-  public List<GetChatRoomListResponse> getAdminChatRooms(ChatRoomStatus status) {
-    List<ChatRoom> chatRooms;
+  public GetAdminChatRoomsResponse getAdminChatRooms(ChatRoomStatus status, int page, int size) {
+    size = normalizeSize(size);
 
+    Pageable pageable = PageRequest.of(page, size);
+
+    Page<ChatRoom> chatRooms;
+
+    // status가 없으면 전체 문의방 조회
+    // status가 있으면 해당 상태의 문의방만 조회
     if (status == null) {
-      chatRooms = chatRoomRepository.findAllByOrderByCreatedAtDesc();
+      chatRooms = chatRoomRepository.findAllByOrderByCreatedAtDesc(pageable);
     } else {
-      chatRooms = chatRoomRepository.findAllByStatusOrderByCreatedAtDesc(status);
+      chatRooms = chatRoomRepository.findAllByStatusOrderByCreatedAtDesc(status, pageable);
     }
 
-    return chatRooms.stream()
-        .map(GetChatRoomListResponse::from)
-        .toList();
+    List<GetChatRoomListResponse> responses =
+        chatRooms.getContent()
+            .stream()
+            .map(GetChatRoomListResponse::from)
+            .toList();
+
+    return GetAdminChatRoomsResponse.of(responses, chatRooms);
   }
 
   /**

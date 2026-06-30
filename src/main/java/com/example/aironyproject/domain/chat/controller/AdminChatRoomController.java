@@ -3,10 +3,9 @@ package com.example.aironyproject.domain.chat.controller;
 import com.example.aironyproject.common.response.CommonApiResponse;
 import com.example.aironyproject.domain.chat.dto.response.AcceptChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.CompleteChatRoomResponse;
-import com.example.aironyproject.domain.chat.dto.response.GetChatRoomListResponse;
+import com.example.aironyproject.domain.chat.dto.response.GetAdminChatRoomsResponse;
 import com.example.aironyproject.domain.chat.enums.ChatRoomStatus;
 import com.example.aironyproject.domain.chat.service.ChatRoomService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,21 +25,23 @@ public class AdminChatRoomController {
   private final ChatRoomService chatRoomService;
 
   /**
-   * 관리자 문의방 목록 조회
+   * 관리자 문의방 목록을 페이지 단위로 조회
    *
-   * status 값이 없으면 전체 문의방 조회
+   * status 값이 없으면 전체 문의방을 조회
    * status 값이 있으면 해당 상태의 문의방만 조회
    */
   @GetMapping
-  public ResponseEntity<CommonApiResponse<List<GetChatRoomListResponse>>> getAdminChatRooms(
-      @RequestParam(required = false) ChatRoomStatus status
+  public ResponseEntity<CommonApiResponse<GetAdminChatRoomsResponse>> getAdminChatRooms(
+      @RequestParam(required = false) ChatRoomStatus status,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size
   ) {
-      List<GetChatRoomListResponse> responses =
-          chatRoomService.getAdminChatRooms(status);
+      GetAdminChatRoomsResponse response =
+          chatRoomService.getAdminChatRooms(status, page, size);
 
       return ResponseEntity
           .status(HttpStatus.OK)
-          .body(CommonApiResponse.success(HttpStatus.OK, "관리자 문의 목록 조회 성공", responses));
+          .body(CommonApiResponse.success(HttpStatus.OK, "관리자 문의 목록 조회 성공", response));
   }
 
   @PatchMapping("/{chatRoomId}/accept")
