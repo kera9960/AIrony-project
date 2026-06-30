@@ -92,19 +92,10 @@ public class ChatRoomService {
    * status 값이 없으면 전체 문의방을 조회
    * status 값이 있으면 해당 상태의 문의방만 조회
    *
-   * @param userId 로그인한 사용자 ID
    * @param status 조회할 문의방 상태, 없으면 전체 조회
    * @return 관리자 문의방 목록
    */
-  public List<GetChatRoomListResponse> getAdminChatRooms(Long userId, ChatRoomStatus status) {
-    User user = userRepository.findById(userId).orElseThrow(
-        () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-    );
-
-    if (!user.getRole().equals(UserRole.ADMIN)) {
-      throw new CustomException(ErrorCode.FORBIDDEN);
-    }
-
+  public List<GetChatRoomListResponse> getAdminChatRooms(ChatRoomStatus status) {
     List<ChatRoom> chatRooms;
 
     if (status == null) {
@@ -135,11 +126,7 @@ public class ChatRoomService {
         () -> new CustomException(ErrorCode.USER_NOT_FOUND)
     );
 
-    if (!admin.getRole().equals(UserRole.ADMIN)) {
-      throw new CustomException(ErrorCode.FORBIDDEN);
-    }
-
-    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
+    ChatRoom chatRoom = chatRoomRepository.findByIdWithPessimisticLock(chatRoomId).orElseThrow(
         () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
     );
 
@@ -153,10 +140,6 @@ public class ChatRoomService {
     User admin = userRepository.findById(userId).orElseThrow(
         () -> new CustomException(ErrorCode.USER_NOT_FOUND)
     );
-
-    if (!admin.getRole().equals(UserRole.ADMIN)) {
-      throw new CustomException(ErrorCode.FORBIDDEN);
-    }
 
     ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
         () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)

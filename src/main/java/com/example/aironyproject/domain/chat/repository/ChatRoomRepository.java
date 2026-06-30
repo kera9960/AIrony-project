@@ -3,9 +3,11 @@ package com.example.aironyproject.domain.chat.repository;
 import com.example.aironyproject.domain.chat.dto.projection.ChatRoomSendValidationProjection;
 import com.example.aironyproject.domain.chat.entity.ChatRoom;
 import com.example.aironyproject.domain.chat.enums.ChatRoomStatus;
+import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -49,4 +51,12 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     WHERE cr.id = :chatRoomId
 """)
   Optional<ChatRoomSendValidationProjection> findSendValidationProjectionById(@Param("chatRoomId") Long chatRoomId);
+
+  /**
+   * 관리자 문의 수락 시 같은 채팅방이 동시에 수정되는 것을 막기 위해
+   * 조회 시점에 해당 채팅방 row에 비관적 락을 건다.
+   */
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("SELECT c FROM ChatRoom c WHERE c.id = :chatRoomId")
+  Optional<ChatRoom> findByIdWithPessimisticLock(Long chatRoomId);
 }
