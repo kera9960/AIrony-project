@@ -2,6 +2,7 @@ package com.example.aironyproject.domain.accommodationLike.service;
 
 import com.example.aironyproject.common.exception.CustomException;
 import com.example.aironyproject.common.exception.ErrorCode;
+import com.example.aironyproject.domain.accommodationLike.dto.AccommodationLikeCountResponse;
 import com.example.aironyproject.domain.accommodationLike.dto.CreateAccommodationLikeResponse;
 import com.example.aironyproject.domain.accommodationLike.dto.GetMyAccommodationLikeResponse;
 import com.example.aironyproject.domain.accommodationLike.dto.PopularAccommodationResponse;
@@ -93,5 +94,12 @@ public class AccommodationLikeService {
 
         // 5. DB 조회 결과 반환
         return popularAccommodations;
+    }
+
+    public void initializePopularAccommodationRanking() {
+        List<AccommodationLikeCountResponse> likeCounts =
+                accommodationLikeRepository.findAccommodationLikeCounts();
+
+        popularAccommodationRankingService.initializeRanking(likeCounts);
     }
 }
