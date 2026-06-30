@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -20,7 +21,11 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "chat_messages")
+@Table(name = "chat_messages",
+       indexes = {
+          @Index(name = "idx_chat_messages_chat_room_id_id", columnList = "chat_room_id, id")
+       }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatMessage {
 
