@@ -53,7 +53,7 @@ public class PopularAccommodationRankingService {
     }
 
     // Top10 조회 -> INACTIVE 숙소가 조회될 수 있으니 20개를 가져오고 10개로 제한
-    public Set<ZSetOperations.TypedTuple<String>> getPopularAccommodations() {
+    public Set<ZSetOperations.TypedTuple<String>> getPopularAccommodationCandidates() {
         return stringRedisTemplate.opsForZSet()
                 .reverseRangeWithScores(POPULAR_ACCOMMODATION_RANKING, 0, 19);
     }

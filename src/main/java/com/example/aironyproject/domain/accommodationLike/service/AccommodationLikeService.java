@@ -82,16 +82,18 @@ public class AccommodationLikeService {
     }
 
     public List<PopularAccommodationResponse> getPopularAccommodations() {
-        // Redis Sorted Set에서 찜 수(score)가 높은 순서로 인기 숙소 Top 10 조회
+        // Redis Sorted Set에서 인기 숙소 후보를 조회
+        // 실제 응답은 ACTIVE 숙소만 내려야 하므로, Redis에서는 20개를 조회
         Set<ZSetOperations.TypedTuple<String>> rankingTuples =
-                popularAccommodationRankingService.getPopularAccommodations();
+                popularAccommodationRankingService.getPopularAccommodationCandidates();
 
         // Redis 랭킹 데이터가 없으면 기존 DB 집계 쿼리로 fallback
         if (rankingTuples == null || rankingTuples.isEmpty()) {
             return getPopularAccommodationsFromDatabase();
         }
 
-        // Redis에서 조회한 값 중 숙소 ID(value) 또는 찜 수(score)가 없는 데이터는 제외
+        // Redis에서 조회한 member/value와 score를 서비스에서 사용하기 쉬운 DTO로 변환
+        // value가 숫자가 아니거나 score가 없는 잘못된 데이터는 from() 내부에서 null로 처리
         List<PopularAccommodationRanking> rankings = rankingTuples.stream()
                 .map(PopularAccommodationRanking::from)
                 .filter(Objects::nonNull)
@@ -102,15 +104,18 @@ public class AccommodationLikeService {
             return getPopularAccommodationsFromDatabase();
         }
 
-        // Redis Sorted Set의 member(value)는 accommodationId 문자열이므로 Long 타입으로 변환
+        // Redis에는 숙소 ID와 찜 수만 저장되어 있으므로, 숙소명 등 응답에 필요한 정보를 조회하기 위해 ID 목록을 만들기
         List<Long> accommodationIds = rankings.stream()
                 .map(PopularAccommodationRanking::accommodationId)
                 .toList();
 
-        // Redis에는 숙소 ID와 찜 수만 있으므로, 숙소명 등 상세 정보는 DB에서 조회
+        // 숙소 정보는 DB에서 조회한 뒤, Redis 랭킹 순서를 유지하기 위해 id 기준 Map으로 변환
         Map<Long, Accommodation> accommodationMap = accommodationRepository.findAllById(accommodationIds)
                 .stream()
                 .collect(Collectors.toMap(Accommodation::getId, Function.identity()));
+
+        // Redis 랭킹 순서를 기준으로 응답 DTO를 생성
+        // DB에서 찾을 수 없거나 ACTIVE 상태가 아닌 숙소는 응답에서 제외
         List<PopularAccommodationResponse> responses = rankings.stream()
                 .map(ranking -> {
                     Accommodation accommodation = accommodationMap.get(ranking.accommodationId());
@@ -124,7 +129,7 @@ public class AccommodationLikeService {
                 .filter(Objects::nonNull)
                 .limit(10)
                 .toList();
-
+        // Redis 랭킹은 있었지만 응답 가능한 숙소가 없으면 DB 집계 쿼리로 fallback
         if (responses.isEmpty()) {
             return getPopularAccommodationsFromDatabase();
         }
@@ -135,12 +140,5 @@ public class AccommodationLikeService {
     // fallback 메서드
     private List<PopularAccommodationResponse> getPopularAccommodationsFromDatabase() {
         return accommodationLikeRepository.findPopularAccommodation();
-    }
-
-    public void initializePopularAccommodationRanking() {
-        List<AccommodationLikeCountResponse> likeCounts =
-                accommodationLikeRepository.findAccommodationLikeCounts();
-
-        popularAccommodationRankingService.initializeRanking(likeCounts);
     }
 }
