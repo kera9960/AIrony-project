@@ -26,6 +26,7 @@ public class AccommodationLikeService {
     private final AccommodationRepository accommodationRepository;
     private final UserRepository userRepository;
     private final AccommodationLikeCacheService accommodationLikeCacheService;
+    private final PopularAccommodationRankingService popularAccommodationRankingService;
 
     @Transactional
     public CreateAccommodationLikeResponse createLike(Long userId, Long accommodationId) {
@@ -45,6 +46,9 @@ public class AccommodationLikeService {
         AccommodationLike accommodationLike = new AccommodationLike(user, accommodation);
         AccommodationLike savedLike = accommodationLikeRepository.save(accommodationLike);
 
+        // 찜 등록 성공 후 Redis Sorted Set의 해당 숙소 찜 수 score +1
+        popularAccommodationRankingService.increaseLikeCount(accommodationId);
+
         return CreateAccommodationLikeResponse.from(savedLike);
     }
 
@@ -55,6 +59,9 @@ public class AccommodationLikeService {
                 .orElseThrow(() -> new CustomException(ErrorCode.ACCOMMODATION_LIKE_NOT_FOUND));
 
         accommodationLikeRepository.delete(accommodationLike);
+
+        // 찜 취소 성공 후 Redis Sorted Set의 해당 숙소 찜 수 score -1
+        popularAccommodationRankingService.decreaseLikeCount(accommodationId);
     }
 
     public List<GetMyAccommodationLikeResponse> getMyAccommodationLike(Long userId) {
