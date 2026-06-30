@@ -33,11 +33,10 @@ public class AdminChatRoomController {
    */
   @GetMapping
   public ResponseEntity<CommonApiResponse<List<GetChatRoomListResponse>>> getAdminChatRooms(
-      @AuthenticationPrincipal Long userId,
       @RequestParam(required = false) ChatRoomStatus status
   ) {
       List<GetChatRoomListResponse> responses =
-          chatRoomService.getAdminChatRooms(userId, status);
+          chatRoomService.getAdminChatRooms(status);
 
       return ResponseEntity
           .status(HttpStatus.OK)
