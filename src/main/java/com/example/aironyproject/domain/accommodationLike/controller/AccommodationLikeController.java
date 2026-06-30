@@ -53,4 +53,14 @@ public class AccommodationLikeController {
                 .status(HttpStatus.OK)
                 .body(CommonApiResponse.success(HttpStatus.OK,"내 찜 목록 조회 성공", responses));
     }
+
+    // 초기화 테스트용 API
+    @PostMapping("/ranking/initialize")
+    public ResponseEntity<CommonApiResponse<Void>> initializePopularAccommodationRanking() {
+        accommodationLikeService.initializePopularAccommodationRanking();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(CommonApiResponse.success(HttpStatus.OK, "인기 숙소 랭킹 초기화 성공", null));
+    }
 }

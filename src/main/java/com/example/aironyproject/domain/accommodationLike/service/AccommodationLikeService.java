@@ -9,14 +9,21 @@ import com.example.aironyproject.domain.accommodationLike.dto.PopularAccommodati
 import com.example.aironyproject.domain.accommodationLike.entity.AccommodationLike;
 import com.example.aironyproject.domain.accommodationLike.repository.AccommodationLikeRepository;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
+import com.example.aironyproject.domain.accommodations.enums.AccommodationStatus;
 import com.example.aironyproject.domain.accommodations.repository.AccommodationRepository;
 import com.example.aironyproject.domain.user.entity.User;
 import com.example.aironyproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +33,6 @@ public class AccommodationLikeService {
     private final AccommodationLikeRepository accommodationLikeRepository;
     private final AccommodationRepository accommodationRepository;
     private final UserRepository userRepository;
-    private final AccommodationLikeCacheService accommodationLikeCacheService;
     private final PopularAccommodationRankingService popularAccommodationRankingService;
 
     @Transactional
@@ -44,6 +50,9 @@ public class AccommodationLikeService {
             throw new CustomException(ErrorCode.ACCOMMODATION_ALREADY_LIKED);
         }
 
+        if (accommodation.getStatus() != AccommodationStatus.ACTIVE) {
+            throw new CustomException(ErrorCode.ACCOMMODATION_NOT_ACTIVE);
+        }
         AccommodationLike accommodationLike = new AccommodationLike(user, accommodation);
         AccommodationLike savedLike = accommodationLikeRepository.save(accommodationLike);
 
@@ -76,24 +85,56 @@ public class AccommodationLikeService {
     }
 
     public List<PopularAccommodationResponse> getPopularAccommodations() {
-        // 1. 캐시가 있는 지 확인
-        List<PopularAccommodationResponse> cachedPopularAccommodations =
-                accommodationLikeCacheService.getTop10PopularAccommodations();
+        // Redis Sorted Set에서 찜 수(score)가 높은 순서로 인기 숙소 Top 10 조회
+        Set<ZSetOperations.TypedTuple<String>> rankingTuples =
+                popularAccommodationRankingService.getTop10PopularAccommodations();
 
-        // 2. 캐시가 있으면 Redis 캐시 반환
-        if(cachedPopularAccommodations != null) {
-            return cachedPopularAccommodations;
+        // Redis 랭킹 데이터가 없으면 기존 DB 집계 쿼리로 fallback
+        if (rankingTuples == null || rankingTuples.isEmpty()) {
+            return accommodationLikeRepository.findPopularAccommodation();
         }
 
-        // 3. 캐시가 없으면 DB에서 직접 조회
-        List<PopularAccommodationResponse> popularAccommodations =
-                accommodationLikeRepository.findPopularAccommodation();
+        // Redis에서 조회한 값 중 숙소 ID(value) 또는 찜 수(score)가 없는 데이터는 제외
+        List<ZSetOperations.TypedTuple<String>> validRankingTuples = rankingTuples.stream()
+                .filter(tuple -> tuple.getValue() != null)
+                .filter(tuple -> tuple.getScore() != null)
+                .toList();
 
-        // 4. DB에서 직접 조회한 값을 캐시에 저장
-        accommodationLikeCacheService.savePopularAccommodations(popularAccommodations);
+        // 유효한 Redis 랭킹 데이터가 없으면 기존 DB 집계 쿼리로 fallback
+        if (validRankingTuples.isEmpty()) {
+            return accommodationLikeRepository.findPopularAccommodation();
+        }
 
-        // 5. DB 조회 결과 반환
-        return popularAccommodations;
+        // Redis Sorted Set의 member(value)는 accommodationId 문자열이므로 Long 타입으로 변환
+        List<Long> accommodationIds = validRankingTuples.stream()
+                .map(tuple -> Long.valueOf(Objects.requireNonNull(tuple.getValue())))
+                .toList();
+
+        // Redis에는 숙소 ID와 찜 수만 있으므로, 숙소명 등 상세 정보는 DB에서 조회
+        Map<Long, Accommodation> accommodationMap = accommodationRepository.findAllById(accommodationIds)
+                .stream()
+                .collect(Collectors.toMap(Accommodation::getId, Function.identity()));
+
+        // Redis 랭킹 순서를 유지하면서 DB 숙소 정보와 Redis score를 조합해 응답 DTO 생성
+        return validRankingTuples.stream()
+                .map(tuple -> {
+                    String value = Objects.requireNonNull(tuple.getValue());
+                    Double score = Objects.requireNonNull(tuple.getScore());
+
+                    Long accommodationId = Long.valueOf(value);
+                    Accommodation accommodation = accommodationMap.get(accommodationId);
+
+                    // Redis에는 숙소 ID가 있지만 DB에서 숙소를 찾지 못한 경우 응답에서 제외
+                    if (accommodation == null || accommodation.getStatus() != AccommodationStatus.ACTIVE) {
+                        return null;
+                    }
+
+                    Long likeCount = score.longValue();
+
+                    return PopularAccommodationResponse.from(accommodation, likeCount);
+                })
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     public void initializePopularAccommodationRanking() {

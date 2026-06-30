@@ -3,9 +3,11 @@ package com.example.aironyproject.domain.accommodationLike.service;
 import com.example.aironyproject.domain.accommodationLike.dto.AccommodationLikeCountResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -48,5 +50,11 @@ public class PopularAccommodationRankingService {
                     accommodationLikeCountResponse.likeCount()
             );
         }
+    }
+
+    // Top10 조회
+    public Set<ZSetOperations.TypedTuple<String>> getTop10PopularAccommodations() {
+        return stringRedisTemplate.opsForZSet()
+                .reverseRangeWithScores(POPULAR_ACCOMMODATION_RANKING, 0, 9);
     }
 }
