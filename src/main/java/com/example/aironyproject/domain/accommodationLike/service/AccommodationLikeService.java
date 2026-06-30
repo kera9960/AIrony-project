@@ -4,6 +4,7 @@ import com.example.aironyproject.common.exception.CustomException;
 import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.accommodationLike.dto.*;
 import com.example.aironyproject.domain.accommodationLike.entity.AccommodationLike;
+import com.example.aironyproject.domain.accommodationLike.enums.PopularAccommodationRankingType;
 import com.example.aironyproject.domain.accommodationLike.repository.AccommodationLikeRepository;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
 import com.example.aironyproject.domain.accommodations.enums.AccommodationStatus;
@@ -81,15 +82,15 @@ public class AccommodationLikeService {
                 .toList();
     }
 
-    public List<PopularAccommodationResponse> getPopularAccommodations() {
+    public List<PopularAccommodationResponse> getPopularAccommodations(PopularAccommodationRankingType rankingType) {
         // Redis Sorted Set에서 인기 숙소 후보를 조회
         // 실제 응답은 ACTIVE 숙소만 내려야 하므로, Redis에서는 20개를 조회
         Set<ZSetOperations.TypedTuple<String>> rankingTuples =
-                popularAccommodationRankingService.getPopularAccommodationCandidates();
+                popularAccommodationRankingService.getPopularAccommodationCandidates(rankingType);
 
         // Redis 랭킹 데이터가 없으면 기존 DB 집계 쿼리로 fallback
         if (rankingTuples == null || rankingTuples.isEmpty()) {
-            return getPopularAccommodationsFromDatabase();
+            return getPopularAccommodationsFromDatabase(rankingType);
         }
 
         // Redis에서 조회한 member/value와 score를 서비스에서 사용하기 쉬운 DTO로 변환
@@ -101,7 +102,7 @@ public class AccommodationLikeService {
 
         // 유효한 Redis 랭킹 데이터가 없으면 기존 DB 집계 쿼리로 fallback
         if (rankings.isEmpty()) {
-            return getPopularAccommodationsFromDatabase();
+            return getPopularAccommodationsFromDatabase(rankingType);
         }
 
         // Redis에는 숙소 ID와 찜 수만 저장되어 있으므로, 숙소명 등 응답에 필요한 정보를 조회하기 위해 ID 목록을 만들기
@@ -131,14 +132,19 @@ public class AccommodationLikeService {
                 .toList();
         // Redis 랭킹은 있었지만 응답 가능한 숙소가 없으면 DB 집계 쿼리로 fallback
         if (responses.isEmpty()) {
-            return getPopularAccommodationsFromDatabase();
+            return getPopularAccommodationsFromDatabase(rankingType);
         }
 
         return responses;
     }
 
     // fallback 메서드
-    private List<PopularAccommodationResponse> getPopularAccommodationsFromDatabase() {
-        return accommodationLikeRepository.findPopularAccommodation();
+    private List<PopularAccommodationResponse> getPopularAccommodationsFromDatabase(PopularAccommodationRankingType rankingType) {
+
+        // 기간별 랭킹 타입이 전체가 아니면 빈 리스트 반환
+        if (rankingType != PopularAccommodationRankingType.ALL) {
+            return List.of();
+
+        } return accommodationLikeRepository.findPopularAccommodation();
     }
 }

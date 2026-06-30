@@ -3,6 +3,7 @@ package com.example.aironyproject.domain.accommodations.controller;
 import java.util.List;
 
 import com.example.aironyproject.domain.accommodationLike.dto.PopularAccommodationResponse;
+import com.example.aironyproject.domain.accommodationLike.enums.PopularAccommodationRankingType;
 import com.example.aironyproject.domain.accommodationLike.service.AccommodationLikeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,9 +57,10 @@ public class AccommodationController {
 	}
 
 	@GetMapping("/popular-accommodations")
-	public ResponseEntity<CommonApiResponse<List<PopularAccommodationResponse>>> getPopularAccommodations() {
-
-		List<PopularAccommodationResponse> responses = accommodationLikeService.getPopularAccommodations();
+	public ResponseEntity<CommonApiResponse<List<PopularAccommodationResponse>>> getPopularAccommodations(
+			@RequestParam(defaultValue = "ALL") PopularAccommodationRankingType rankingType
+	) {
+		List<PopularAccommodationResponse> responses = accommodationLikeService.getPopularAccommodations(rankingType);
 
 		return ResponseEntity
 				.status(HttpStatus.OK)
