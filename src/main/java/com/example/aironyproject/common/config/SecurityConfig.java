@@ -1,4 +1,4 @@
-package com.example.aironyproject.config;
+package com.example.aironyproject.common.config;
 
 import com.example.aironyproject.common.security.JwtAuthFilter;
 import jakarta.servlet.http.HttpServletResponse;
