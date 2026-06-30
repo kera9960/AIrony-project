@@ -20,7 +20,6 @@ import com.example.aironyproject.domain.chat.enums.ChatRoomStatus;
 import com.example.aironyproject.domain.chat.repository.ChatMessageRepository;
 import com.example.aironyproject.domain.chat.repository.ChatRoomRepository;
 import com.example.aironyproject.domain.user.entity.User;
-import com.example.aironyproject.domain.user.enums.UserRole;
 import com.example.aironyproject.domain.user.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -170,6 +169,7 @@ public class ChatRoomService {
       Long cursor,
       int size
   ) {
+    size = normalizeSize(size);
 
     ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
         () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
@@ -178,7 +178,8 @@ public class ChatRoomService {
     // 문의를 생성한 회원 또는 배정된 관리자만 메시지를 조회
     boolean isOwner = chatRoom.getMember().getId().equals(userId);
 
-    boolean isAssignedAdmin = chatRoom.getAdmin() != null && chatRoom.getAdmin().getId().equals(userId);
+    boolean isAssignedAdmin = chatRoom.getAdmin() != null &&
+                              chatRoom.getAdmin().getId().equals(userId);
 
     if (!isOwner && !isAssignedAdmin) {
       throw new CustomException(ErrorCode.FORBIDDEN);
@@ -301,5 +302,15 @@ public class ChatRoomService {
     if (validation.status() != ChatRoomStatus.IN_PROGRESS) {
       throw new CustomException(ErrorCode.CHAT_MESSAGE_NOT_ALLOWED);
     }
+  }
+
+  // 채팅 메세지 조회 size 범위 제한 메서드
+  // 기본값: 20, 최소값: 20, 최대값: 50
+  private int normalizeSize(int size) {
+    if (size < 20) {
+      return 20;
+    }
+
+    return Math.min(size, 50);
   }
 }
