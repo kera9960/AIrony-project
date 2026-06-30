@@ -95,6 +95,7 @@ public class ChatRoomService {
    */
   public GetAdminChatRoomsResponse getAdminChatRooms(ChatRoomStatus status, int page, int size) {
     size = normalizeSize(size);
+    page = normalizePage(page);
 
     Pageable pageable = PageRequest.of(page, size);
 
@@ -321,5 +322,11 @@ public class ChatRoomService {
     }
 
     return Math.min(size, 50);
+  }
+
+  // 페이지 범위 제한 메서드
+  // 기본값: 0, 최소값: 0
+  private int normalizePage(int page) {
+    return Math.max(page, 0);
   }
 }
