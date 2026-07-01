@@ -4,11 +4,13 @@ import com.example.aironyproject.common.exception.CustomException;
 import com.example.aironyproject.common.exception.ErrorCode;
 import com.example.aironyproject.domain.accommodations.entity.Accommodation;
 import com.example.aironyproject.domain.accommodations.repository.AccommodationRepository;
+import com.example.aironyproject.domain.chat.dto.projection.ChatRoomSendValidationProjection;
 import com.example.aironyproject.domain.chat.dto.request.CreateChatRoomRequest;
 import com.example.aironyproject.domain.chat.dto.request.SendChatMessageRequest;
 import com.example.aironyproject.domain.chat.dto.response.AcceptChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.CompleteChatRoomResponse;
 import com.example.aironyproject.domain.chat.dto.response.CreateChatRoomResponse;
+import com.example.aironyproject.domain.chat.dto.response.GetAdminChatRoomsResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatMessageResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatMessagesResponse;
 import com.example.aironyproject.domain.chat.dto.response.GetChatRoomDetailResponse;
@@ -19,10 +21,10 @@ import com.example.aironyproject.domain.chat.enums.ChatRoomStatus;
 import com.example.aironyproject.domain.chat.repository.ChatMessageRepository;
 import com.example.aironyproject.domain.chat.repository.ChatRoomRepository;
 import com.example.aironyproject.domain.user.entity.User;
-import com.example.aironyproject.domain.user.enums.UserRole;
 import com.example.aironyproject.domain.user.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -84,37 +86,36 @@ public class ChatRoomService {
   }
 
   /**
-   * 관리자 문의방 목록 조회
-   * 로그인한 사용자가 ADMIN 권한인지 확인한 뒤,
-   * 문의방 목록을 생성일 기준 최신순으로 조회
+   * 관리자 문의방 목록을 페이지 단위로 조회
    *
-   * status 값이 없으면 전체 문의방을 조회
-   * status 값이 있으면 해당 상태의 문의방만 조회
-   *
-   * @param userId 로그인한 사용자 ID
    * @param status 조회할 문의방 상태, 없으면 전체 조회
-   * @return 관리자 문의방 목록
+   * @param page 조회할 페이지 번호
+   * @param size 한 페이지에 조회할 문의방 개수
+   * @return 페이지 정보가 포함된 관리자 문의방 목록
    */
-  public List<GetChatRoomListResponse> getAdminChatRooms(Long userId, ChatRoomStatus status) {
-    User user = userRepository.findById(userId).orElseThrow(
-        () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-    );
+  public GetAdminChatRoomsResponse getAdminChatRooms(ChatRoomStatus status, int page, int size) {
+    size = normalizeSize(size);
+    page = normalizePage(page);
 
-    if (!user.getRole().equals(UserRole.ADMIN)) {
-      throw new CustomException(ErrorCode.FORBIDDEN);
-    }
+    Pageable pageable = PageRequest.of(page, size);
 
-    List<ChatRoom> chatRooms;
+    Page<ChatRoom> chatRooms;
 
+    // status가 없으면 전체 문의방 조회
+    // status가 있으면 해당 상태의 문의방만 조회
     if (status == null) {
-      chatRooms = chatRoomRepository.findAllByOrderByCreatedAtDesc();
+      chatRooms = chatRoomRepository.findAllByOrderByCreatedAtDesc(pageable);
     } else {
-      chatRooms = chatRoomRepository.findAllByStatusOrderByCreatedAtDesc(status);
+      chatRooms = chatRoomRepository.findAllByStatusOrderByCreatedAtDesc(status, pageable);
     }
 
-    return chatRooms.stream()
-        .map(GetChatRoomListResponse::from)
-        .toList();
+    List<GetChatRoomListResponse> responses =
+        chatRooms.getContent()
+            .stream()
+            .map(GetChatRoomListResponse::from)
+            .toList();
+
+    return GetAdminChatRoomsResponse.of(responses, chatRooms);
   }
 
   /**
@@ -134,11 +135,7 @@ public class ChatRoomService {
         () -> new CustomException(ErrorCode.USER_NOT_FOUND)
     );
 
-    if (!admin.getRole().equals(UserRole.ADMIN)) {
-      throw new CustomException(ErrorCode.FORBIDDEN);
-    }
-
-    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
+    ChatRoom chatRoom = chatRoomRepository.findByIdWithPessimisticLock(chatRoomId).orElseThrow(
         () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
     );
 
@@ -152,10 +149,6 @@ public class ChatRoomService {
     User admin = userRepository.findById(userId).orElseThrow(
         () -> new CustomException(ErrorCode.USER_NOT_FOUND)
     );
-
-    if (!admin.getRole().equals(UserRole.ADMIN)) {
-      throw new CustomException(ErrorCode.FORBIDDEN);
-    }
 
     ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
         () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
@@ -186,6 +179,7 @@ public class ChatRoomService {
       Long cursor,
       int size
   ) {
+    size = normalizeSize(size);
 
     ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
         () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
@@ -194,7 +188,8 @@ public class ChatRoomService {
     // 문의를 생성한 회원 또는 배정된 관리자만 메시지를 조회
     boolean isOwner = chatRoom.getMember().getId().equals(userId);
 
-    boolean isAssignedAdmin = chatRoom.getAdmin() != null && chatRoom.getAdmin().getId().equals(userId);
+    boolean isAssignedAdmin = chatRoom.getAdmin() != null &&
+                              chatRoom.getAdmin().getId().equals(userId);
 
     if (!isOwner && !isAssignedAdmin) {
       throw new CustomException(ErrorCode.FORBIDDEN);
@@ -258,16 +253,24 @@ public class ChatRoomService {
       Long senderId,
       SendChatMessageRequest request
   ) {
-    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(
-        () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
-    );
+    ChatRoomSendValidationProjection validation =
+        chatRoomRepository.findSendValidationProjectionById(chatRoomId).orElseThrow(
+            () -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND)
+        );
+
+    // Projection으로 조회한 memberId/adminId를 기준으로 메시지 전송자가 채팅방 참여자인지 검증
+    validateParticipant(validation, senderId);
+
+    // Projection으로 조회한 status를 기준으로 메시지 전송 가능한 상태인지 검증
+    validateMessageSendable(validation);
+
+    // 채팅방 참여자와 상태 검증은 Projection으로 이미 완료
+    // 메시지 저장에 필요한 chatRoomId는 프록시 객체로 참조하여 불필요한 조회를 줄임
+    ChatRoom chatRoom = chatRoomRepository.getReferenceById(chatRoomId);
 
     // User 엔티티 전체 조회가 필요하지 않아 프록시 객체를 반환하는
-    // getReferenceById()를 사용하여 DB 조회를 지연시킴
+    // getReferenceById()를 사용하여 DB 조회를 줄임
     User user = userRepository.getReferenceById(senderId);
-
-    validateParticipant(chatRoom, user);
-    chatRoom.validateMessageSendable();
 
     ChatMessage chatMessage = new ChatMessage(
         chatRoom,
@@ -284,17 +287,46 @@ public class ChatRoomService {
    * 메시지를 전송하려는 사용자가 해당 채팅방의 참여자인지 검증
    * 문의 생성 회원 또는 배정된 관리자만 메시지 전송 가능
    *
-   * @param chatRoom 검증할 채팅방
-   * @param user 메시지를 전송하려는 사용자
+   * @param validation 메시지 전송 검증에 필요한 채팅방 정보
+   * @param senderId 메시지를 전송하려는 사용자
    */
-  private void validateParticipant(ChatRoom chatRoom, User user) {
+  private void validateParticipant(ChatRoomSendValidationProjection validation, Long senderId) {
 
-    boolean isMember = chatRoom.getMember().getId().equals(user.getId());
+    boolean isMember = validation.memberId().equals(senderId);
 
-    boolean isAdmin = chatRoom.getAdmin() != null && chatRoom.getAdmin().getId().equals(user.getId());
+    boolean isAdmin = validation.adminId() != null &&
+                      validation.adminId().equals(senderId);
 
     if (!isMember && !isAdmin) {
       throw new CustomException(ErrorCode.FORBIDDEN);
     }
+  }
+
+  /**
+   * Projection으로 조회한 채팅방 정보를 기준으로 메시지 전송 가능 상태인지 검증
+   * 진행 중(IN_PROGRESS) 상태의 문의방에서만 메시지 전송 가능
+   *
+   * @param validation 메시지 전송 검증에 필요한 채팅방 정보
+   */
+  private void validateMessageSendable(ChatRoomSendValidationProjection validation) {
+    if (validation.status() != ChatRoomStatus.IN_PROGRESS) {
+      throw new CustomException(ErrorCode.CHAT_MESSAGE_NOT_ALLOWED);
+    }
+  }
+
+  // 채팅 메세지 조회 size 범위 제한 메서드
+  // 기본값: 20, 최소값: 20, 최대값: 50
+  private int normalizeSize(int size) {
+    if (size < 20) {
+      return 20;
+    }
+
+    return Math.min(size, 50);
+  }
+
+  // 페이지 범위 제한 메서드
+  // 기본값: 0, 최소값: 0
+  private int normalizePage(int page) {
+    return Math.max(page, 0);
   }
 }
