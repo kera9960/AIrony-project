@@ -1,4 +1,4 @@
-package com.example.aironyproject.config;
+package com.example.aironyproject.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
