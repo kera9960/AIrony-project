@@ -18,12 +18,14 @@ import com.example.aironyproject.domain.chat.dto.response.GetChatRoomListRespons
 import com.example.aironyproject.domain.chat.entity.ChatMessage;
 import com.example.aironyproject.domain.chat.entity.ChatRoom;
 import com.example.aironyproject.domain.chat.enums.ChatRoomStatus;
+import com.example.aironyproject.domain.chat.messaging.ChatMessageEvent;
 import com.example.aironyproject.domain.chat.repository.ChatMessageRepository;
 import com.example.aironyproject.domain.chat.repository.ChatRoomRepository;
 import com.example.aironyproject.domain.user.entity.User;
 import com.example.aironyproject.domain.user.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +41,7 @@ public class ChatRoomService {
   private final UserRepository userRepository;
   private final AccommodationRepository accommodationRepository;
   private final ChatMessageRepository chatMessageRepository;
+  private final ApplicationEventPublisher eventPublisher;
 
   @Transactional
   public CreateChatRoomResponse createChatRoom(Long userId, CreateChatRoomRequest request) {
@@ -280,7 +283,14 @@ public class ChatRoomService {
 
     ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
 
-    return GetChatMessageResponse.from(savedChatMessage);
+    GetChatMessageResponse response = GetChatMessageResponse.from(savedChatMessage);
+
+    // 스프링 내부에 이벤트를 알려주는 역할
+    // 메세지 저장 후 Redis 발행을 직접 하지 않고 이벤트만 발행
+    // 실제 Redis 발행은 트랜잭션 커밋 이후 이벤트 리스너에서 비동기로 처리
+    eventPublisher.publishEvent(new ChatMessageEvent(chatRoomId, response));
+
+    return response;
   }
 
   /**
