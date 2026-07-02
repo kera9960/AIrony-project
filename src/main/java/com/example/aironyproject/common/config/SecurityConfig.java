@@ -48,7 +48,7 @@ public class SecurityConfig {
 
                 // 경로별 인가(Authorization) 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/accommodations/**", "/api/coupons", "/ws/**").permitAll()
+                        .requestMatchers("/", "/index.html", "/accommodations", "/search", "/detail", "/checkout", "/complete", "/coupons", "/my-coupons", "/likes", "/reservations", "/reservation-detail", "/my-inquiries", "/inquiries", "/admin", "/auth", "/my", "/*.html", "/api/auth/signup", "/api/auth/login", "/api/accommodations/**", "/api/coupons", "/ws/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
