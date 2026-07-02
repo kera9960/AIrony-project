@@ -211,7 +211,7 @@ src/main/java/com/example/aironyproject
 | [API 명세](https://github.com/kera9960/AIrony-project/wiki/API-%EB%AA%85%EC%84%B8)        | REST API와 WebSocket/STOMP 명세 |
 | [실시간 채팅 시스템 고도화](https://github.com/kera9960/AIrony-project/wiki/실시간-문의-채팅-시스템-고도화-리포트) | WebSocket, STOMP, Redis Pub/Sub 설계 |
 | [동시성 제어](https://github.com/kera9960/AIrony-project/wiki/동시성-제어)                                                             | 예약과 쿠폰의 동시성 문제 해결 |
-| [캐싱 전략](../../wiki/캐싱-전략)                                                               | Redis Sorted Set 기반 인기 숙소 랭킹 |
+| [캐싱 전략](https://github.com/kera9960/AIrony-project/wiki/인기-숙소-조회-고도화-리포트)                                                             | Redis Sorted Set 기반 인기 숙소 랭킹 |
 | [인덱싱 전략](https://github.com/kera9960/AIrony-project/wiki/백엔드-종합-성능-및-아키텍처-고도화-리포트)      | 숙소 검색 쿼리와 복합 인덱스 적용 |
 
 ## 저장소
