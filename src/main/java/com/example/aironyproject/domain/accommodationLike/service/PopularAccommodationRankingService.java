@@ -54,9 +54,9 @@ public class PopularAccommodationRankingService {
     }
 
     // DB fallback 시 Redis도 같이 rebuild
-    public void replaceRanking(List<AccommodationLikeCountResponse> counts) {
+    public void replaceRanking(PopularAccommodationRankingType rankingType, List<AccommodationLikeCountResponse> counts) {
         // Redis key 생성
-        String key = createRankingKey(PopularAccommodationRankingType.ALL);
+        String key = createRankingKey(rankingType);
 
         // 기존 전체 랭킹 캐시를 삭제하고 DB 집계 결과 기준으로 새로 적재
         stringRedisTemplate.delete(key);
@@ -69,6 +69,8 @@ public class PopularAccommodationRankingService {
                         count.likeCount()
                 )
         );
+
+        setRankingKeyTtl(key, rankingType);
     }
 
     // Top10 조회 -> INACTIVE 숙소가 조회될 수 있으니 20개를 가져오고 10개로 제한

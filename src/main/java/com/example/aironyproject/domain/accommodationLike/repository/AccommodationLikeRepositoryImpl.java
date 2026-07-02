@@ -7,6 +7,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.example.aironyproject.domain.accommodationLike.entity.QAccommodationLike.accommodationLike;
@@ -46,6 +47,27 @@ public class AccommodationLikeRepositoryImpl implements AccommodationLikeCustomR
                 .from(accommodationLike)
                 .join(accommodationLike.accommodation, accommodation)
                 .where(accommodation.status.eq(AccommodationStatus.ACTIVE))
+                .groupBy(accommodation.id)
+                .fetch();
+    }
+
+    @Override
+    public List<AccommodationLikeCountResponse> findAccommodationLikeCountsBetween(
+            LocalDateTime start,
+            LocalDateTime end
+    ) {
+        return jpaQueryFactory
+                .select(Projections.constructor(AccommodationLikeCountResponse.class,
+                        accommodation.id,
+                        accommodationLike.id.count()
+                ))
+                .from(accommodationLike)
+                .join(accommodationLike.accommodation, accommodation)
+                .where(
+                        accommodation.status.eq(AccommodationStatus.ACTIVE),
+                        accommodationLike.createdAt.goe(start),
+                        accommodationLike.createdAt.lt(end)
+                )
                 .groupBy(accommodation.id)
                 .fetch();
     }

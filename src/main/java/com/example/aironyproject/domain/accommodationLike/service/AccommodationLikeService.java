@@ -16,6 +16,8 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -141,18 +143,48 @@ public class AccommodationLikeService {
     // fallback 메서드
     private List<PopularAccommodationResponse> getPopularAccommodationsFromDatabase(PopularAccommodationRankingType rankingType) {
 
-        // 기간별 랭킹 타입이 전체가 아니면 빈 리스트 반환
-        if (rankingType != PopularAccommodationRankingType.ALL) {
-            return List.of();
-        }
-
         // DB에서 ACTIVE 숙소별 찜 개수 집계
-        List<AccommodationLikeCountResponse> counts =
-                accommodationLikeRepository.findAccommodationLikeCounts();
+        List<AccommodationLikeCountResponse> counts = getLikeCountsByRankingType(rankingType);
 
-        // DB 집계 결과를 Redis에 적재
-        popularAccommodationRankingService.replaceRanking(counts);
+        // Redis가 비어 있던 상황이므로 DB 집계 결과를 해당 기간 랭킹 key에 재적재
+        popularAccommodationRankingService.replaceRanking(rankingType, counts);
 
         return accommodationLikeRepository.findPopularAccommodation();
+    }
+
+    private List<AccommodationLikeCountResponse> getLikeCountsByRankingType(
+            PopularAccommodationRankingType rankingType
+    ) {
+        // 현재 날짜를 기준으로 일간/주간/월간 집계 범위를 계산
+        LocalDate today = LocalDate.now();
+
+        return switch (rankingType) {
+            // 전체 랭킹은 기간 제한 없이 전체 찜 데이터를 집계
+            case ALL -> accommodationLikeRepository.findAccommodationLikeCounts();
+
+            // 일간 랭킹은 오늘 00:00:00부터 내일 00:00:00 전까지 집계
+            case DAILY -> accommodationLikeRepository.findAccommodationLikeCountsBetween(
+                    today.atStartOfDay(),
+                    today.plusDays(1).atStartOfDay()
+            );
+
+            // 주간 랭킹은 ISO 기준 월요일 00:00:00부터 다음 주 월요일 00:00:00 전까지 집계
+            case WEEKLY -> {
+                LocalDate start = today.with(DayOfWeek.MONDAY);
+                yield accommodationLikeRepository.findAccommodationLikeCountsBetween(
+                        start.atStartOfDay(),
+                        start.plusWeeks(1).atStartOfDay()
+                );
+            }
+
+            // 월간 랭킹은 이번 달 1일 00:00:00부터 다음 달 1일 00:00:00 전까지 집계
+            case MONTHLY -> {
+                LocalDate start = today.withDayOfMonth(1);
+                yield accommodationLikeRepository.findAccommodationLikeCountsBetween(
+                        start.atStartOfDay(),
+                        start.plusMonths(1).atStartOfDay()
+                );
+            }
+        };
     }
 }
