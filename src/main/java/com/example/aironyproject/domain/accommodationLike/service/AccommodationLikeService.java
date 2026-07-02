@@ -144,7 +144,15 @@ public class AccommodationLikeService {
         // 기간별 랭킹 타입이 전체가 아니면 빈 리스트 반환
         if (rankingType != PopularAccommodationRankingType.ALL) {
             return List.of();
+        }
 
-        } return accommodationLikeRepository.findPopularAccommodation();
+        // DB에서 ACTIVE 숙소별 찜 개수 집계
+        List<AccommodationLikeCountResponse> counts =
+                accommodationLikeRepository.findAccommodationLikeCounts();
+
+        // DB 집계 결과를 Redis에 적재
+        popularAccommodationRankingService.replaceRanking(counts);
+
+        return accommodationLikeRepository.findPopularAccommodation();
     }
 }

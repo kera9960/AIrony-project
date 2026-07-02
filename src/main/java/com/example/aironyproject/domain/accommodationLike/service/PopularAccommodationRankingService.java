@@ -1,5 +1,6 @@
 package com.example.aironyproject.domain.accommodationLike.service;
 
+import com.example.aironyproject.domain.accommodationLike.dto.AccommodationLikeCountResponse;
 import com.example.aironyproject.domain.accommodationLike.enums.PopularAccommodationRankingType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -49,6 +51,24 @@ public class PopularAccommodationRankingService {
                 );
             }
         }
+    }
+
+    // DB fallback 시 Redis도 같이 rebuild
+    public void replaceRanking(List<AccommodationLikeCountResponse> counts) {
+        // Redis key 생성
+        String key = createRankingKey(PopularAccommodationRankingType.ALL);
+
+        // 기존 전체 랭킹 캐시를 삭제하고 DB 집계 결과 기준으로 새로 적재
+        stringRedisTemplate.delete(key);
+
+        // 숙소 ID를 member로, 찜 개수를 score로 저장
+        counts.forEach(count ->
+                stringRedisTemplate.opsForZSet().add(
+                        key,
+                        count.accommodationId().toString(),
+                        count.likeCount()
+                )
+        );
     }
 
     // Top10 조회 -> INACTIVE 숙소가 조회될 수 있으니 20개를 가져오고 10개로 제한
