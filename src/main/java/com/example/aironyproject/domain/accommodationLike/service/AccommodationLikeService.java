@@ -149,7 +149,7 @@ public class AccommodationLikeService {
         // Redis가 비어 있던 상황이므로 DB 집계 결과를 해당 기간 랭킹 key에 재적재
         popularAccommodationRankingService.replaceRanking(rankingType, counts);
 
-        return accommodationLikeRepository.findPopularAccommodation();
+        return getPopularAccommodations(rankingType);
     }
 
     private List<AccommodationLikeCountResponse> getLikeCountsByRankingType(

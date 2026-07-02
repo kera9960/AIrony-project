@@ -327,25 +327,69 @@ VALUES
 -- 테스트 DB에서만 실행
 DELETE FROM accommodation_likes;
 
--- ACTIVE / INACTIVE 상관없이 상위 랭킹 후보를 만들기 위해 전체 숙소에 찜 생성
 INSERT IGNORE INTO accommodation_likes (user_id, accommodation_id, created_at, updated_at)
 SELECT
     u.id,
     a.id,
     CASE
-        WHEN u.user_no % 10 IN (0, 1, 2) THEN NOW()
-        WHEN u.user_no % 10 IN (3, 4, 5, 6)
-            THEN DATE_SUB(NOW(), INTERVAL (u.user_no % 6 + 1) DAY)
-        ELSE DATE_SUB(NOW(), INTERVAL (u.user_no % 30 + 10) DAY)
-END AS created_at,
+        -- 랜덤 그룹 0: 오늘 찜 많음 → DAILY 강세
+        WHEN a.random_group = 0 THEN NOW()
+
+        -- 랜덤 그룹 1: 1~6일 전 찜 많음 → WEEKLY 강세
+        WHEN a.random_group = 1
+            THEN DATE_SUB(NOW(), INTERVAL (1 + MOD(u.user_no, 6)) DAY)
+
+        -- 랜덤 그룹 2: 8~25일 전 찜 많음 → MONTHLY 강세
+        WHEN a.random_group = 2
+            THEN DATE_SUB(NOW(), INTERVAL (8 + MOD(u.user_no, 18)) DAY)
+
+        -- 랜덤 그룹 3: 40일 이상 지난 찜 많음 → ALL 강세
+        WHEN a.random_group = 3
+            THEN DATE_SUB(NOW(), INTERVAL (40 + MOD(u.user_no, 120)) DAY)
+
+        -- 나머지 그룹: 오늘/이번주/이번달/오래된 찜을 골고루 분산
+        ELSE
+            CASE
+                WHEN MOD(a.id + u.user_no, 4) = 0
+                    THEN NOW()
+                WHEN MOD(a.id + u.user_no, 4) = 1
+                    THEN DATE_SUB(NOW(), INTERVAL (1 + MOD(u.user_no, 6)) DAY)
+                WHEN MOD(a.id + u.user_no, 4) = 2
+                    THEN DATE_SUB(NOW(), INTERVAL (8 + MOD(u.user_no, 22)) DAY)
+                ELSE DATE_SUB(NOW(), INTERVAL (40 + MOD(u.user_no, 120)) DAY)
+                END
+        END AS created_at,
     NOW() AS updated_at
-FROM accommodations a
-JOIN (
+FROM (
+         SELECT
+             id,
+             status,
+             FLOOR(RAND(id) * 10) AS random_group
+         FROM accommodations
+         WHERE id <= 200
+     ) a
+         JOIN (
     SELECT
         id,
         CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(email, '@', 1), 'user', -1) AS UNSIGNED) AS user_no
     FROM users
     WHERE email REGEXP '^user[0-9]+@test\\.com$'
 ) u
-    ON u.user_no <= 20 + MOD(a.id * 13, 181)
-WHERE a.id <= 200;
+              ON u.user_no <=
+                 CASE
+                     -- DAILY 강세 그룹: 찜 수 많게
+                     WHEN a.random_group = 0 THEN 180 - MOD(a.id * 3, 60)
+
+                     -- WEEKLY 강세 그룹: 찜 수 많게
+                     WHEN a.random_group = 1 THEN 190 - MOD(a.id * 5, 70)
+
+                     -- MONTHLY 강세 그룹: 찜 수 많게
+                     WHEN a.random_group = 2 THEN 200 - MOD(a.id * 7, 80)
+
+                     -- ALL 강세 그룹: 오래된 찜이 많고 누적 수 높게
+                     WHEN a.random_group = 3 THEN 200 - MOD(a.id * 11, 60)
+
+                     -- 나머지는 중간 정도로 분산
+                     ELSE 30 + MOD(a.id * 13, 120)
+                     END
+WHERE a.status = 'ACTIVE';
