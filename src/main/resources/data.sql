@@ -323,3 +323,29 @@ VALUES
     ('여름 휴가 지원 3만원 할인 쿠폰', 30000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
     ('여름 휴가 지원 4만원 할인 쿠폰', 40000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW()),
     ('여름 휴가 지원 5만원 할인 쿠폰', 50000, 20, 20, NOW(), '2026-12-31 23:59:59', 'ACTIVE', NOW(), NOW());
+
+-- 테스트 DB에서만 실행
+DELETE FROM accommodation_likes;
+
+-- ACTIVE / INACTIVE 상관없이 상위 랭킹 후보를 만들기 위해 전체 숙소에 찜 생성
+INSERT IGNORE INTO accommodation_likes (user_id, accommodation_id, created_at, updated_at)
+SELECT
+    u.id,
+    a.id,
+    CASE
+        WHEN u.user_no % 10 IN (0, 1, 2) THEN NOW()
+        WHEN u.user_no % 10 IN (3, 4, 5, 6)
+            THEN DATE_SUB(NOW(), INTERVAL (u.user_no % 6 + 1) DAY)
+        ELSE DATE_SUB(NOW(), INTERVAL (u.user_no % 30 + 10) DAY)
+END AS created_at,
+    NOW() AS updated_at
+FROM accommodations a
+JOIN (
+    SELECT
+        id,
+        CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(email, '@', 1), 'user', -1) AS UNSIGNED) AS user_no
+    FROM users
+    WHERE email REGEXP '^user[0-9]+@test\\.com$'
+) u
+    ON u.user_no <= 20 + MOD(a.id * 13, 181)
+WHERE a.id <= 200;
