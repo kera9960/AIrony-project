@@ -2173,6 +2173,12 @@
       return token() ? { Authorization: `Bearer ${token()}` } : {};
     }
 
+    function clearLegacyUsedCouponCache() {
+      Object.keys(localStorage)
+        .filter((key) => key.startsWith("aibnb.usedCoupons."))
+        .forEach((key) => localStorage.removeItem(key));
+    }
+
     function decodeTokenRole() {
       const value = token();
       if (!value) return null;
@@ -2266,38 +2272,8 @@
       return String(coupon?.userCouponId ?? coupon?.couponId ?? coupon?.id ?? "");
     }
 
-    function usedCouponStorageKey() {
-      return `aibnb.usedCoupons.${getCurrentUserId() ?? "guest"}`;
-    }
-
-    function readLocalUsedCouponIds() {
-      try {
-        return new Set(JSON.parse(localStorage.getItem(usedCouponStorageKey()) ?? "[]").map(String));
-      } catch {
-        return new Set();
-      }
-    }
-
-    function writeLocalUsedCouponIds(ids) {
-      localStorage.setItem(usedCouponStorageKey(), JSON.stringify([...ids]));
-    }
-
-    function markCouponUsed(couponId) {
-      if (!couponId) return;
-      const ids = readLocalUsedCouponIds();
-      ids.add(String(couponId));
-      writeLocalUsedCouponIds(ids);
-    }
-
-    function markCouponRestored(couponId) {
-      if (!couponId) return;
-      const ids = readLocalUsedCouponIds();
-      ids.delete(String(couponId));
-      writeLocalUsedCouponIds(ids);
-    }
-
     async function getUnavailableCouponIds() {
-      const ids = readLocalUsedCouponIds();
+      const ids = new Set();
       const reservations = await apiGet("/api/reservations/me", []);
       const activeReservations = reservations.filter((reservation) => !isCanceled(reservation.status));
       const details = await Promise.all(activeReservations.map((reservation) => {
@@ -3391,7 +3367,6 @@
           checkInDate: reservationState.checkInDate,
           checkOutDate: reservationState.checkOutDate
         });
-        markCouponUsed(reservationState.selectedCoupon?.couponId);
         reservationState.createdReservation = reservation;
         reservationState.selectedCoupon = null;
         await route("/complete", new URLSearchParams());
@@ -3415,7 +3390,6 @@
       }
       try {
         await apiPatch(`/api/reservations/${activeReservationId}/cancel`, { reason });
-        markCouponRestored(activeReservationCouponId);
         alert("예약이 취소되었습니다.");
         await route("/reservations", new URLSearchParams());
       } catch (error) {
@@ -3634,6 +3608,7 @@
     const bars = [4, 4, 5, 8, 16, 22, 34, 42, 50, 58, 64, 70, 66, 54, 44, 38, 34, 30, 28, 25, 22, 20, 18, 16, 14, 12, 10, 8];
     document.querySelector("#priceBars").innerHTML = bars.map((height) => `<span style="height:${height}px"></span>`).join("");
     document.querySelector(".date-grid").after(document.querySelector("#dateModal"));
+    clearLegacyUsedCouponCache();
     syncPriceLabels();
     refreshCurrentUser().then(() => route(location.pathname, new URLSearchParams(location.search), false));
   </script>
